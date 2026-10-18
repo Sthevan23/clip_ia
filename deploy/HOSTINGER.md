@@ -24,27 +24,76 @@ Conteúdo: só PHP + assets + pastas graváveis vazias. **Não inclui** `worker_
 
 ## 4. Credenciais fora do site (obrigatório)
 
-Crie **fora** de `public_html`:
+O Auto Deploy publica o repositório em **`public_html/clipia/`** (raiz do app = pasta `clipia`). Credenciais de produção **nunca** devem ir para o repositório.
 
-`/home/uSEU_ID/clipia_secrets/env.production.php`
+### Opção recomendada na Hostinger: pasta `private/` na raiz do domínio
 
-Use o modelo em **`deploy/clipia_secrets/env.production.example.php`** (copie, renomeie, preencha MySQL + `WORKER_SHARED_SECRET` + hash da senha do admin).
+Com o app em `public_html/clipia/`, o `config/app.php` resolve:
 
-Permissões: pasta `700`, arquivo `600`.
+- `$projectRootDir` → `.../public_html/clipia`
+- `$parentOfPublicRoot` → `.../public_html`
+- `$domainRootDir` → `.../domains/sthevandev.com.br`
+
+O arquivo privado deve ficar em **`$domainRootDir/private/`** (fora de `public_html`), por exemplo:
+
+`/home/u586160337/domains/sthevandev.com.br/private/clipia.env.php`
+
+Crie **manualmente** no servidor (Gerenciador de Arquivos, FTP ou SFTP):
+
+- Pasta **`private`** em **`domains/sthevandev.com.br/private/`** (irmã de `public_html`, **não** dentro de `public_html/clipia` nem de `public_html/private`).
+- Arquivo: **`clipia.env.php`** — deve **`return [ ... ];`** (array associativo PHP), no mesmo formato de **`config/env.production.example.php`**.
+- Permissões sugeridas: pasta `private` **700**, arquivo **600**.
+- **Não** envie `clipia.env.php` ao GitHub; **não** coloque cópia preenchida no projeto local versionado.
+
+Chaves que o painel precisa (preencha no servidor com valores reais; abaixo só nomes, sem segredos):
+
+| Chave | Finalidade |
+|--------|------------|
+| `APP_ENV` | `production` |
+| `APP_URL` | URL HTTPS pública do site |
+| `APP_TIMEZONE` | Ex.: `America/Sao_Paulo` |
+| `DB_DRIVER` | `mysql` |
+| `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASS` | MySQL do hPanel |
+| `ADMIN_OWNER_NAME`, `ADMIN_OWNER_EMAIL`, `ADMIN_OWNER_PASSWORD_HASH` | Conta admin inicial (hash bcrypt) |
+| `WORKER_SHARED_SECRET` | HMAC compartilhado com o worker Python (mín. 16 caracteres) |
+| `WORKER_REQUIRE_HTTPS` | `1` em produção |
+| `WORKER_JOB_STALE_TIMEOUT_SECONDS` | Ex.: `1800` |
+| `CLIPIA_MAX_MONTHLY_COST_BRL`, `CLIPIA_MAX_COST_PER_JOB_BRL` | Teto de orçamento (se API paga no futuro) |
+| `STORAGE_*` | Limites de upload e retenção de mídia |
+
+Ordem de leitura no PHP: variáveis de ambiente do hPanel (`getenv`) têm **prioridade** sobre o arquivo; entre arquivos, `{domainRootDir}/private/clipia.env.php` é mesclado antes de `config/env.local.php`.
+
+### Alternativas já suportadas pelo código
+
+- `~/clipia_secrets/env.production.php` (fora de `public_html`)
+- `~/clipia_env.php`
+- `CLIPIA_ENV_FILE` apontando para caminho absoluto no servidor
+- `public_html/config/env.local.php` (gitignored; pasta `config/` bloqueada por HTTP)
+
+Modelo versionado no Git (placeholders fictícios): **`config/env.production.example.php`**.
 
 ## 5. Worker Python (não vai na Hostinger)
 
-No seu PC/VPS, mantenha **`worker_service/`** com `.env` apontando para:
+No seu PC/VPS, mantenha **`worker_service/`** com **`.env` local** (gitignored) apontando para:
 
-`https://seudominio.com.br/pages/worker-api.php`
+`https://clipia.sthevandev.com.br/pages/worker-api.php`
 
-Mesmo `WORKER_SHARED_SECRET` do PHP.
+Variáveis reconhecidas pelo código: `CLIPIA_BACKEND_API_URL`, `CLIPIA_WORKER_SHARED_SECRET` (= `WORKER_SHARED_SECRET` do PHP), `CLIPIA_VERIFY_TLS=true`, `CLIPIA_AI_PROVIDER=local_heuristic`, `CLIPIA_ALLOW_PAID_API=false`.
+
+Verificação offline (sem reservar tarefas):
+
+```powershell
+cd worker_service
+python verify_local_config.py
+```
+
+O Auto Deploy **não envia** `worker_service/.env` — apenas o código versionado no GitHub.
 
 ## 6. Checklist rápido
 
 | Onde | O quê |
 |------|--------|
-| `public_html/` | Conteúdo do ZIP |
+| `public_html/` | Conteúdo do Git (Auto Deploy) |
 | MySQL | `schema.sql` importado |
-| `~/clipia_secrets/` | `env.production.php` |
+| `.../private/clipia.env.php` | Credenciais de produção (manual, fora do Git) |
 | PC/VPS | `worker_service/` + FFmpeg + Whisper |

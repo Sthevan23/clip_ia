@@ -15,8 +15,10 @@ if (is_string($customEnvPath) && $customEnvPath !== '') {
 }
 $projectRootDir = dirname(__DIR__);
 $parentOfPublicRoot = dirname($projectRootDir);
+$domainRootDir = dirname($parentOfPublicRoot);
 $candidateEnvFiles[] = $parentOfPublicRoot . '/clipia_secrets/env.production.php';
 $candidateEnvFiles[] = $parentOfPublicRoot . '/clipia_env.php';
+$candidateEnvFiles[] = $domainRootDir . '/private/clipia.env.php';
 $candidateEnvFiles[] = __DIR__ . '/env.local.php';
 
 $localEnv = [];
