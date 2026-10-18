@@ -1,0 +1,88 @@
+{
+  "ok": true,
+  "source_file": "C:\\Users\\Administrador\\OneDrive\\Desktop\\projeto_clips\\storage\\samples\\authorized_demo_podcast_speech.mp4",
+  "transcript_segments_count": 4,
+  "audio_duration_seconds": 43.85,
+  "selection_parameters": {
+    "min_duration_seconds": 15.0,
+    "max_duration_seconds": 45.0,
+    "target_clips_count": 1,
+    "aspect_ratio": "9:16",
+    "subtitle_style": {
+      "burn_subtitles": true,
+      "export_srt": true,
+      "font_family": "Arial",
+      "font_size": "large",
+      "primary_color": "#FFFFFF",
+      "highlight_color": "#FACC15",
+      "outline_color": "#000000",
+      "position": "bottom",
+      "style_preset": "clean_outline",
+      "highlight_keywords": true
+    }
+  },
+  "candidates": [
+    {
+      "start_time_seconds": 0.0,
+      "end_time_seconds": 23.77,
+      "duration_seconds": 23.77,
+      "title": "História: Quando eu comecei a gravar vídeos educativos em casa, aconteceu uma história...",
+      "short_description": "Relato completo sobre uma experiência real e a lição prática extraída. No começo achei que tinha perdido tudo na demonstração, mas aprendia a fazer um checklist simples antes de cada gravação e o resultado foi nunca...",
+      "hashtags": [
+        "#importante",
+        "#checklist",
+        "#resultado",
+        "#historia",
+        "#historiareal",
+        "#bastidores",
+        "#aprendizado"
+      ],
+      "category": "historia_completa",
+      "summary": "Aborda Quando eu comecei a gravar vídeos educativos em casa, aconteceu uma história curiosa no primeiro mês de projeto e conclui mostrando No começo achei que tinha perdido tudo na demonstração, mas aprendia a fazer um checklist simples antes de cada gravação e o resultado.",
+      "rationale": "Relato contextualizado com abertura clara, desenvolvimento do episódio e lição final. Selecionado com 23.8s dentro da janela configurada (15s–45s), apresentando abertura contextualizada e fechamento completo.",
+      "transcript_excerpt": "Quando eu comecei a gravar vídeos educativos em casa, aconteceu uma história curiosa no primeiro mês de projeto. No começo achei que tinha perdido tudo na demonstração, mas aprendia a fazer um checklist simples antes de cada gravação e o resultado foi nunca mais perder uma seção importante de trabalho.",
+      "relevance_score": 96,
+      "storage_url": "storage/clips/clip_local_run_01_0s_24s.mp4",
+      "srt_storage_url": "storage/clips/clip_local_run_01_0s_24s.srt",
+      "srt_content": "1\n00:00:00,000 --> 00:00:02,260\nQuando eu comecei\na gravar vídeos\n\n2\n00:00:02,260 --> 00:00:04,060\neducativos em casa,\n\n3\n00:00:04,420 --> 00:00:07,060\naconteceu uma história\ncuriosa no primeiro\n\n4\n00:00:07,060 --> 00:00:08,420\nmês de projeto.\n\n5\n00:00:09,330 --> 00:00:11,750\nNo começo achei\nque tinha perdido\n\n6\n00:00:11,750 --> 00:00:13,390\ntudo na demonstração,\n\n7\n00:00:13,790 --> 00:00:15,850\nmas aprendia a\nfazer um checklist\n\n8\n00:00:15,850 --> 00:00:18,810\nsimples antes de\ncada gravação e\n\n9\n00:00:18,810 --> 00:00:21,290\no resultado foi\nnunca mais perder\n\n10\n00:00:21,290 --> 00:00:23,770\numa seção importante\nde trabalho.\n",
+      "subtitles_burned": true,
+      "subtitle_style": {
+        "burn_subtitles": true,
+        "export_srt": true,
+        "font_family": "Arial",
+        "font_size": "large",
+        "primary_color": "#FFFFFF",
+        "highlight_color": "#FACC15",
+        "outline_color": "#000000",
+        "position": "bottom",
+        "style_preset": "clean_outline",
+        "highlight_keywords": true
+      },
+      "status": "ready"
+    }
+  ],
+  "usage_metrics": {
+    "transcription_mode": "faster_whisper_local",
+    "whisper_model": "base",
+    "whisper_device": "cpu",
+    "audio_duration_seconds": 43.85,
+    "chunks_analyzed": 1,
+    "analysis_provider": "local_heuristic",
+    "llm_model_used": "none",
+    "paid_api_used": false,
+    "llm_calls_count": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "llm_tokens_used": 0,
+    "provider_reported_cost_usd": null,
+    "estimated_cost_brl": 0.0,
+    "monthly_spent_brl_after": 0.4,
+    "budget_blocked": false,
+    "retries_count": 0,
+    "ffmpeg_used": true,
+    "clips_rendered_count": 1,
+    "subtitles_generated_count": 1,
+    "subtitles_burned": true,
+    "errors_logged": []
+  }
+}

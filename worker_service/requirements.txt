@@ -1,0 +1,9 @@
+# ClipIA Worker Service — Dependências Python (Windows / Servidor dedicado)
+# IMPORTANTE: Não instale este serviço na hospedagem compartilhada Hostinger.
+# Execute no computador de desenvolvimento Windows ou em um servidor VPS/GPU compatível.
+
+faster-whisper>=1.0.3
+imageio-ffmpeg>=0.5.1
+pydantic>=2.7.0
+httpx>=0.27.0
+python-dotenv>=1.0.1

@@ -1,0 +1,38 @@
+# Arquivos de configuração com credenciais reais e segredos (nunca versionar)
+/config/env.local.php
+/config/env.production.php
+.env
+.env.*
+!.env.example
+worker_service/.env
+worker_service/.env.*
+!worker_service/.env.example
+*.key
+*.pem
+
+# Uploads, locks e dados locais de execução
+/storage/uploads/*
+!/storage/uploads/.gitkeep
+/storage/clips/*
+!/storage/clips/.gitkeep
+/storage/logs/*
+!/storage/logs/.gitkeep
+/storage/budget_ledger.json
+/storage/budget_ledger.lock
+/storage/single_worker.lock
+/uploads/videos/*
+!/uploads/videos/.gitkeep
+
+# Banco de dados de testes automatizados locais
+/config/*.sqlite
+/config/*.db
+/storage/*.sqlite
+/storage/*.db
+/tests/*.sqlite
+
+# Logs e arquivos temporários
+*.log
+*.bak
+.DS_Store
+Thumbs.db
+

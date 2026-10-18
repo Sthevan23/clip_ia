@@ -1,0 +1,2279 @@
+{
+  "language": "pt",
+  "duration_seconds": 212.0,
+  "source_label": "authorized_demo_podcast.mp4",
+  "segments": [
+    {
+      "start": 0.0,
+      "end": 14.5,
+      "text": "Quando eu comecei a gravar vídeos educativos em casa, aconteceu uma história curiosa no primeiro mês de projeto.",
+      "words": [
+        {
+          "word": "Quando",
+          "start": 0.0,
+          "end": 0.92,
+          "probability": 0.94
+        },
+        {
+          "word": "eu",
+          "start": 0.92,
+          "end": 1.23,
+          "probability": 0.94
+        },
+        {
+          "word": "comecei",
+          "start": 1.23,
+          "end": 2.3,
+          "probability": 0.94
+        },
+        {
+          "word": "a",
+          "start": 2.3,
+          "end": 2.45,
+          "probability": 0.94
+        },
+        {
+          "word": "gravar",
+          "start": 2.45,
+          "end": 3.37,
+          "probability": 0.94
+        },
+        {
+          "word": "vídeos",
+          "start": 3.37,
+          "end": 4.29,
+          "probability": 0.94
+        },
+        {
+          "word": "educativos",
+          "start": 4.29,
+          "end": 5.82,
+          "probability": 0.94
+        },
+        {
+          "word": "em",
+          "start": 5.82,
+          "end": 6.13,
+          "probability": 0.94
+        },
+        {
+          "word": "casa,",
+          "start": 6.13,
+          "end": 6.89,
+          "probability": 0.94
+        },
+        {
+          "word": "aconteceu",
+          "start": 6.89,
+          "end": 8.26,
+          "probability": 0.94
+        },
+        {
+          "word": "uma",
+          "start": 8.26,
+          "end": 8.72,
+          "probability": 0.94
+        },
+        {
+          "word": "história",
+          "start": 8.72,
+          "end": 9.94,
+          "probability": 0.94
+        },
+        {
+          "word": "curiosa",
+          "start": 9.94,
+          "end": 11.01,
+          "probability": 0.94
+        },
+        {
+          "word": "no",
+          "start": 11.01,
+          "end": 11.32,
+          "probability": 0.94
+        },
+        {
+          "word": "primeiro",
+          "start": 11.32,
+          "end": 12.54,
+          "probability": 0.94
+        },
+        {
+          "word": "mês",
+          "start": 12.54,
+          "end": 13.0,
+          "probability": 0.94
+        },
+        {
+          "word": "de",
+          "start": 13.0,
+          "end": 13.31,
+          "probability": 0.94
+        },
+        {
+          "word": "projeto.",
+          "start": 13.31,
+          "end": 14.5,
+          "probability": 0.94
+        }
+      ]
+    },
+    {
+      "start": 14.5,
+      "end": 29.0,
+      "text": "Eu passei três dias editando um vídeo inteiro sem perceber que o microfone principal estava desligado e só o áudio da webcam tinha sido gravado.",
+      "words": [
+        {
+          "word": "Eu",
+          "start": 14.5,
+          "end": 14.74,
+          "probability": 0.94
+        },
+        {
+          "word": "passei",
+          "start": 14.74,
+          "end": 15.46,
+          "probability": 0.94
+        },
+        {
+          "word": "três",
+          "start": 15.46,
+          "end": 15.94,
+          "probability": 0.94
+        },
+        {
+          "word": "dias",
+          "start": 15.94,
+          "end": 16.42,
+          "probability": 0.94
+        },
+        {
+          "word": "editando",
+          "start": 16.42,
+          "end": 17.39,
+          "probability": 0.94
+        },
+        {
+          "word": "um",
+          "start": 17.39,
+          "end": 17.63,
+          "probability": 0.94
+        },
+        {
+          "word": "vídeo",
+          "start": 17.63,
+          "end": 18.23,
+          "probability": 0.94
+        },
+        {
+          "word": "inteiro",
+          "start": 18.23,
+          "end": 19.08,
+          "probability": 0.94
+        },
+        {
+          "word": "sem",
+          "start": 19.08,
+          "end": 19.44,
+          "probability": 0.94
+        },
+        {
+          "word": "perceber",
+          "start": 19.44,
+          "end": 20.41,
+          "probability": 0.94
+        },
+        {
+          "word": "que",
+          "start": 20.41,
+          "end": 20.77,
+          "probability": 0.94
+        },
+        {
+          "word": "o",
+          "start": 20.77,
+          "end": 20.89,
+          "probability": 0.94
+        },
+        {
+          "word": "microfone",
+          "start": 20.89,
+          "end": 21.98,
+          "probability": 0.94
+        },
+        {
+          "word": "principal",
+          "start": 21.98,
+          "end": 23.07,
+          "probability": 0.94
+        },
+        {
+          "word": "estava",
+          "start": 23.07,
+          "end": 23.8,
+          "probability": 0.94
+        },
+        {
+          "word": "desligado",
+          "start": 23.8,
+          "end": 24.89,
+          "probability": 0.94
+        },
+        {
+          "word": "e",
+          "start": 24.89,
+          "end": 25.01,
+          "probability": 0.94
+        },
+        {
+          "word": "só",
+          "start": 25.01,
+          "end": 25.25,
+          "probability": 0.94
+        },
+        {
+          "word": "o",
+          "start": 25.25,
+          "end": 25.37,
+          "probability": 0.94
+        },
+        {
+          "word": "áudio",
+          "start": 25.37,
+          "end": 25.97,
+          "probability": 0.94
+        },
+        {
+          "word": "da",
+          "start": 25.97,
+          "end": 26.21,
+          "probability": 0.94
+        },
+        {
+          "word": "webcam",
+          "start": 26.21,
+          "end": 26.94,
+          "probability": 0.94
+        },
+        {
+          "word": "tinha",
+          "start": 26.94,
+          "end": 27.54,
+          "probability": 0.94
+        },
+        {
+          "word": "sido",
+          "start": 27.54,
+          "end": 28.02,
+          "probability": 0.94
+        },
+        {
+          "word": "gravado.",
+          "start": 28.02,
+          "end": 29.0,
+          "probability": 0.94
+        }
+      ]
+    },
+    {
+      "start": 29.0,
+      "end": 43.5,
+      "text": "No começo achei que tinha perdido tudo, mas aprendi a fazer um checklist de trinta segundos antes de cada gravação e o resultado foi nunca mais perder uma sessão.",
+      "words": [
+        {
+          "word": "No",
+          "start": 29.0,
+          "end": 29.22,
+          "probability": 0.94
+        },
+        {
+          "word": "começo",
+          "start": 29.22,
+          "end": 29.87,
+          "probability": 0.94
+        },
+        {
+          "word": "achei",
+          "start": 29.87,
+          "end": 30.41,
+          "probability": 0.94
+        },
+        {
+          "word": "que",
+          "start": 30.41,
+          "end": 30.73,
+          "probability": 0.94
+        },
+        {
+          "word": "tinha",
+          "start": 30.73,
+          "end": 31.27,
+          "probability": 0.94
+        },
+        {
+          "word": "perdido",
+          "start": 31.27,
+          "end": 32.03,
+          "probability": 0.94
+        },
+        {
+          "word": "tudo,",
+          "start": 32.03,
+          "end": 32.57,
+          "probability": 0.94
+        },
+        {
+          "word": "mas",
+          "start": 32.57,
+          "end": 32.89,
+          "probability": 0.94
+        },
+        {
+          "word": "aprendi",
+          "start": 32.89,
+          "end": 33.65,
+          "probability": 0.94
+        },
+        {
+          "word": "a",
+          "start": 33.65,
+          "end": 33.76,
+          "probability": 0.94
+        },
+        {
+          "word": "fazer",
+          "start": 33.76,
+          "end": 34.3,
+          "probability": 0.94
+        },
+        {
+          "word": "um",
+          "start": 34.3,
+          "end": 34.52,
+          "probability": 0.94
+        },
+        {
+          "word": "checklist",
+          "start": 34.52,
+          "end": 35.49,
+          "probability": 0.94
+        },
+        {
+          "word": "de",
+          "start": 35.49,
+          "end": 35.71,
+          "probability": 0.94
+        },
+        {
+          "word": "trinta",
+          "start": 35.71,
+          "end": 36.36,
+          "probability": 0.94
+        },
+        {
+          "word": "segundos",
+          "start": 36.36,
+          "end": 37.23,
+          "probability": 0.94
+        },
+        {
+          "word": "antes",
+          "start": 37.23,
+          "end": 37.77,
+          "probability": 0.94
+        },
+        {
+          "word": "de",
+          "start": 37.77,
+          "end": 37.99,
+          "probability": 0.94
+        },
+        {
+          "word": "cada",
+          "start": 37.99,
+          "end": 38.42,
+          "probability": 0.94
+        },
+        {
+          "word": "gravação",
+          "start": 38.42,
+          "end": 39.29,
+          "probability": 0.94
+        },
+        {
+          "word": "e",
+          "start": 39.29,
+          "end": 39.4,
+          "probability": 0.94
+        },
+        {
+          "word": "o",
+          "start": 39.4,
+          "end": 39.51,
+          "probability": 0.94
+        },
+        {
+          "word": "resultado",
+          "start": 39.51,
+          "end": 40.48,
+          "probability": 0.94
+        },
+        {
+          "word": "foi",
+          "start": 40.48,
+          "end": 40.8,
+          "probability": 0.94
+        },
+        {
+          "word": "nunca",
+          "start": 40.8,
+          "end": 41.34,
+          "probability": 0.94
+        },
+        {
+          "word": "mais",
+          "start": 41.34,
+          "end": 41.77,
+          "probability": 0.94
+        },
+        {
+          "word": "perder",
+          "start": 41.77,
+          "end": 42.42,
+          "probability": 0.94
+        },
+        {
+          "word": "uma",
+          "start": 42.42,
+          "end": 42.74,
+          "probability": 0.94
+        },
+        {
+          "word": "sessão.",
+          "start": 42.74,
+          "end": 43.5,
+          "probability": 0.94
+        }
+      ]
+    },
+    {
+      "start": 43.5,
+      "end": 47.0,
+      "text": "E aí como eu disse antes isso muda a rotina.",
+      "words": [
+        {
+          "word": "E",
+          "start": 43.5,
+          "end": 43.6,
+          "probability": 0.94
+        },
+        {
+          "word": "aí",
+          "start": 43.6,
+          "end": 43.8,
+          "probability": 0.94
+        },
+        {
+          "word": "como",
+          "start": 43.8,
+          "end": 44.2,
+          "probability": 0.94
+        },
+        {
+          "word": "eu",
+          "start": 44.2,
+          "end": 44.4,
+          "probability": 0.94
+        },
+        {
+          "word": "disse",
+          "start": 44.4,
+          "end": 44.9,
+          "probability": 0.94
+        },
+        {
+          "word": "antes",
+          "start": 44.9,
+          "end": 45.4,
+          "probability": 0.94
+        },
+        {
+          "word": "isso",
+          "start": 45.4,
+          "end": 45.8,
+          "probability": 0.94
+        },
+        {
+          "word": "muda",
+          "start": 45.8,
+          "end": 46.2,
+          "probability": 0.94
+        },
+        {
+          "word": "a",
+          "start": 46.2,
+          "end": 46.3,
+          "probability": 0.94
+        },
+        {
+          "word": "rotina.",
+          "start": 46.3,
+          "end": 47.0,
+          "probability": 0.94
+        }
+      ]
+    },
+    {
+      "start": 47.0,
+      "end": 62.0,
+      "text": "A melhor dica prática para quem quer melhorar a retenção em vídeos curtos é estruturar cada bloco em três passos simples.",
+      "words": [
+        {
+          "word": "A",
+          "start": 47.0,
+          "end": 47.15,
+          "probability": 0.94
+        },
+        {
+          "word": "melhor",
+          "start": 47.15,
+          "end": 48.04,
+          "probability": 0.94
+        },
+        {
+          "word": "dica",
+          "start": 48.04,
+          "end": 48.63,
+          "probability": 0.94
+        },
+        {
+          "word": "prática",
+          "start": 48.63,
+          "end": 49.67,
+          "probability": 0.94
+        },
+        {
+          "word": "para",
+          "start": 49.67,
+          "end": 50.26,
+          "probability": 0.94
+        },
+        {
+          "word": "quem",
+          "start": 50.26,
+          "end": 50.85,
+          "probability": 0.94
+        },
+        {
+          "word": "quer",
+          "start": 50.85,
+          "end": 51.44,
+          "probability": 0.94
+        },
+        {
+          "word": "melhorar",
+          "start": 51.44,
+          "end": 52.63,
+          "probability": 0.94
+        },
+        {
+          "word": "a",
+          "start": 52.63,
+          "end": 52.78,
+          "probability": 0.94
+        },
+        {
+          "word": "retenção",
+          "start": 52.78,
+          "end": 53.97,
+          "probability": 0.94
+        },
+        {
+          "word": "em",
+          "start": 53.97,
+          "end": 54.27,
+          "probability": 0.94
+        },
+        {
+          "word": "vídeos",
+          "start": 54.27,
+          "end": 55.16,
+          "probability": 0.94
+        },
+        {
+          "word": "curtos",
+          "start": 55.16,
+          "end": 56.05,
+          "probability": 0.94
+        },
+        {
+          "word": "é",
+          "start": 56.05,
+          "end": 56.2,
+          "probability": 0.94
+        },
+        {
+          "word": "estruturar",
+          "start": 56.2,
+          "end": 57.69,
+          "probability": 0.94
+        },
+        {
+          "word": "cada",
+          "start": 57.69,
+          "end": 58.28,
+          "probability": 0.94
+        },
+        {
+          "word": "bloco",
+          "start": 58.28,
+          "end": 59.02,
+          "probability": 0.94
+        },
+        {
+          "word": "em",
+          "start": 59.02,
+          "end": 59.32,
+          "probability": 0.94
+        },
+        {
+          "word": "três",
+          "start": 59.32,
+          "end": 59.91,
+          "probability": 0.94
+        },
+        {
+          "word": "passos",
+          "start": 59.91,
+          "end": 60.8,
+          "probability": 0.94
+        },
+        {
+          "word": "simples.",
+          "start": 60.8,
+          "end": 62.0,
+          "probability": 0.94
+        }
+      ]
+    },
+    {
+      "start": 62.0,
+      "end": 76.5,
+      "text": "Primeiro apresente o problema real logo na primeira frase, depois mostre um exemplo prático e finalize com uma recomendação clara que a pessoa possa aplicar hoje.",
+      "words": [
+        {
+          "word": "Primeiro",
+          "start": 62.0,
+          "end": 62.85,
+          "probability": 0.94
+        },
+        {
+          "word": "apresente",
+          "start": 62.85,
+          "end": 63.8,
+          "probability": 0.94
+        },
+        {
+          "word": "o",
+          "start": 63.8,
+          "end": 63.91,
+          "probability": 0.94
+        },
+        {
+          "word": "problema",
+          "start": 63.91,
+          "end": 64.76,
+          "probability": 0.94
+        },
+        {
+          "word": "real",
+          "start": 64.76,
+          "end": 65.18,
+          "probability": 0.94
+        },
+        {
+          "word": "logo",
+          "start": 65.18,
+          "end": 65.6,
+          "probability": 0.94
+        },
+        {
+          "word": "na",
+          "start": 65.6,
+          "end": 65.81,
+          "probability": 0.94
+        },
+        {
+          "word": "primeira",
+          "start": 65.81,
+          "end": 66.66,
+          "probability": 0.94
+        },
+        {
+          "word": "frase,",
+          "start": 66.66,
+          "end": 67.3,
+          "probability": 0.94
+        },
+        {
+          "word": "depois",
+          "start": 67.3,
+          "end": 67.94,
+          "probability": 0.94
+        },
+        {
+          "word": "mostre",
+          "start": 67.94,
+          "end": 68.58,
+          "probability": 0.94
+        },
+        {
+          "word": "um",
+          "start": 68.58,
+          "end": 68.79,
+          "probability": 0.94
+        },
+        {
+          "word": "exemplo",
+          "start": 68.79,
+          "end": 69.53,
+          "probability": 0.94
+        },
+        {
+          "word": "prático",
+          "start": 69.53,
+          "end": 70.27,
+          "probability": 0.94
+        },
+        {
+          "word": "e",
+          "start": 70.27,
+          "end": 70.38,
+          "probability": 0.94
+        },
+        {
+          "word": "finalize",
+          "start": 70.38,
+          "end": 71.23,
+          "probability": 0.94
+        },
+        {
+          "word": "com",
+          "start": 71.23,
+          "end": 71.55,
+          "probability": 0.94
+        },
+        {
+          "word": "uma",
+          "start": 71.55,
+          "end": 71.87,
+          "probability": 0.94
+        },
+        {
+          "word": "recomendação",
+          "start": 71.87,
+          "end": 73.14,
+          "probability": 0.94
+        },
+        {
+          "word": "clara",
+          "start": 73.14,
+          "end": 73.67,
+          "probability": 0.94
+        },
+        {
+          "word": "que",
+          "start": 73.67,
+          "end": 73.99,
+          "probability": 0.94
+        },
+        {
+          "word": "a",
+          "start": 73.99,
+          "end": 74.1,
+          "probability": 0.94
+        },
+        {
+          "word": "pessoa",
+          "start": 74.1,
+          "end": 74.74,
+          "probability": 0.94
+        },
+        {
+          "word": "possa",
+          "start": 74.74,
+          "end": 75.27,
+          "probability": 0.94
+        },
+        {
+          "word": "aplicar",
+          "start": 75.27,
+          "end": 76.01,
+          "probability": 0.94
+        },
+        {
+          "word": "hoje.",
+          "start": 76.01,
+          "end": 76.5,
+          "probability": 0.94
+        }
+      ]
+    },
+    {
+      "start": 76.5,
+      "end": 88.0,
+      "text": "Evite introduções longas dizendo seu nome ou pedindo inscrição antes de entregar o conteúdo prometido no título.",
+      "words": [
+        {
+          "word": "Evite",
+          "start": 76.5,
+          "end": 77.1,
+          "probability": 0.94
+        },
+        {
+          "word": "introduções",
+          "start": 77.1,
+          "end": 78.42,
+          "probability": 0.94
+        },
+        {
+          "word": "longas",
+          "start": 78.42,
+          "end": 79.14,
+          "probability": 0.94
+        },
+        {
+          "word": "dizendo",
+          "start": 79.14,
+          "end": 79.98,
+          "probability": 0.94
+        },
+        {
+          "word": "seu",
+          "start": 79.98,
+          "end": 80.34,
+          "probability": 0.94
+        },
+        {
+          "word": "nome",
+          "start": 80.34,
+          "end": 80.82,
+          "probability": 0.94
+        },
+        {
+          "word": "ou",
+          "start": 80.82,
+          "end": 81.06,
+          "probability": 0.94
+        },
+        {
+          "word": "pedindo",
+          "start": 81.06,
+          "end": 81.9,
+          "probability": 0.94
+        },
+        {
+          "word": "inscrição",
+          "start": 81.9,
+          "end": 82.98,
+          "probability": 0.94
+        },
+        {
+          "word": "antes",
+          "start": 82.98,
+          "end": 83.58,
+          "probability": 0.94
+        },
+        {
+          "word": "de",
+          "start": 83.58,
+          "end": 83.82,
+          "probability": 0.94
+        },
+        {
+          "word": "entregar",
+          "start": 83.82,
+          "end": 84.78,
+          "probability": 0.94
+        },
+        {
+          "word": "o",
+          "start": 84.78,
+          "end": 84.9,
+          "probability": 0.94
+        },
+        {
+          "word": "conteúdo",
+          "start": 84.9,
+          "end": 85.86,
+          "probability": 0.94
+        },
+        {
+          "word": "prometido",
+          "start": 85.86,
+          "end": 86.94,
+          "probability": 0.94
+        },
+        {
+          "word": "no",
+          "start": 86.94,
+          "end": 87.18,
+          "probability": 0.94
+        },
+        {
+          "word": "título.",
+          "start": 87.18,
+          "end": 88.0,
+          "probability": 0.94
+        }
+      ]
+    },
+    {
+      "start": 88.0,
+      "end": 103.0,
+      "text": "Uma curiosidade interessante que pouca gente sabe sobre áudio digital é que o cérebro humano tolera imagem em baixa resolução, mas abandona o vídeo rapidamente se o som tiver eco.",
+      "words": [
+        {
+          "word": "Uma",
+          "start": 88.0,
+          "end": 88.3,
+          "probability": 0.94
+        },
+        {
+          "word": "curiosidade",
+          "start": 88.3,
+          "end": 89.4,
+          "probability": 0.94
+        },
+        {
+          "word": "interessante",
+          "start": 89.4,
+          "end": 90.6,
+          "probability": 0.94
+        },
+        {
+          "word": "que",
+          "start": 90.6,
+          "end": 90.9,
+          "probability": 0.94
+        },
+        {
+          "word": "pouca",
+          "start": 90.9,
+          "end": 91.4,
+          "probability": 0.94
+        },
+        {
+          "word": "gente",
+          "start": 91.4,
+          "end": 91.9,
+          "probability": 0.94
+        },
+        {
+          "word": "sabe",
+          "start": 91.9,
+          "end": 92.3,
+          "probability": 0.94
+        },
+        {
+          "word": "sobre",
+          "start": 92.3,
+          "end": 92.8,
+          "probability": 0.94
+        },
+        {
+          "word": "áudio",
+          "start": 92.8,
+          "end": 93.3,
+          "probability": 0.94
+        },
+        {
+          "word": "digital",
+          "start": 93.3,
+          "end": 94.0,
+          "probability": 0.94
+        },
+        {
+          "word": "é",
+          "start": 94.0,
+          "end": 94.1,
+          "probability": 0.94
+        },
+        {
+          "word": "que",
+          "start": 94.1,
+          "end": 94.4,
+          "probability": 0.94
+        },
+        {
+          "word": "o",
+          "start": 94.4,
+          "end": 94.5,
+          "probability": 0.94
+        },
+        {
+          "word": "cérebro",
+          "start": 94.5,
+          "end": 95.2,
+          "probability": 0.94
+        },
+        {
+          "word": "humano",
+          "start": 95.2,
+          "end": 95.8,
+          "probability": 0.94
+        },
+        {
+          "word": "tolera",
+          "start": 95.8,
+          "end": 96.4,
+          "probability": 0.94
+        },
+        {
+          "word": "imagem",
+          "start": 96.4,
+          "end": 97.0,
+          "probability": 0.94
+        },
+        {
+          "word": "em",
+          "start": 97.0,
+          "end": 97.2,
+          "probability": 0.94
+        },
+        {
+          "word": "baixa",
+          "start": 97.2,
+          "end": 97.7,
+          "probability": 0.94
+        },
+        {
+          "word": "resolução,",
+          "start": 97.7,
+          "end": 98.7,
+          "probability": 0.94
+        },
+        {
+          "word": "mas",
+          "start": 98.7,
+          "end": 99.0,
+          "probability": 0.94
+        },
+        {
+          "word": "abandona",
+          "start": 99.0,
+          "end": 99.8,
+          "probability": 0.94
+        },
+        {
+          "word": "o",
+          "start": 99.8,
+          "end": 99.9,
+          "probability": 0.94
+        },
+        {
+          "word": "vídeo",
+          "start": 99.9,
+          "end": 100.4,
+          "probability": 0.94
+        },
+        {
+          "word": "rapidamente",
+          "start": 100.4,
+          "end": 101.5,
+          "probability": 0.94
+        },
+        {
+          "word": "se",
+          "start": 101.5,
+          "end": 101.7,
+          "probability": 0.94
+        },
+        {
+          "word": "o",
+          "start": 101.7,
+          "end": 101.8,
+          "probability": 0.94
+        },
+        {
+          "word": "som",
+          "start": 101.8,
+          "end": 102.1,
+          "probability": 0.94
+        },
+        {
+          "word": "tiver",
+          "start": 102.1,
+          "end": 102.6,
+          "probability": 0.94
+        },
+        {
+          "word": "eco.",
+          "start": 102.6,
+          "end": 103.0,
+          "probability": 0.94
+        }
+      ]
+    },
+    {
+      "start": 103.0,
+      "end": 118.0,
+      "text": "Estudos de percepção audiovisual mostram que um áudio limpo faz até uma gravação simples parecer muito mais clara e confiável para quem assiste.",
+      "words": [
+        {
+          "word": "Estudos",
+          "start": 103.0,
+          "end": 103.86,
+          "probability": 0.94
+        },
+        {
+          "word": "de",
+          "start": 103.86,
+          "end": 104.11,
+          "probability": 0.94
+        },
+        {
+          "word": "percepção",
+          "start": 104.11,
+          "end": 105.22,
+          "probability": 0.94
+        },
+        {
+          "word": "audiovisual",
+          "start": 105.22,
+          "end": 106.57,
+          "probability": 0.94
+        },
+        {
+          "word": "mostram",
+          "start": 106.57,
+          "end": 107.43,
+          "probability": 0.94
+        },
+        {
+          "word": "que",
+          "start": 107.43,
+          "end": 107.8,
+          "probability": 0.94
+        },
+        {
+          "word": "um",
+          "start": 107.8,
+          "end": 108.05,
+          "probability": 0.94
+        },
+        {
+          "word": "áudio",
+          "start": 108.05,
+          "end": 108.66,
+          "probability": 0.94
+        },
+        {
+          "word": "limpo",
+          "start": 108.66,
+          "end": 109.27,
+          "probability": 0.94
+        },
+        {
+          "word": "faz",
+          "start": 109.27,
+          "end": 109.64,
+          "probability": 0.94
+        },
+        {
+          "word": "até",
+          "start": 109.64,
+          "end": 110.01,
+          "probability": 0.94
+        },
+        {
+          "word": "uma",
+          "start": 110.01,
+          "end": 110.38,
+          "probability": 0.94
+        },
+        {
+          "word": "gravação",
+          "start": 110.38,
+          "end": 111.36,
+          "probability": 0.94
+        },
+        {
+          "word": "simples",
+          "start": 111.36,
+          "end": 112.22,
+          "probability": 0.94
+        },
+        {
+          "word": "parecer",
+          "start": 112.22,
+          "end": 113.08,
+          "probability": 0.94
+        },
+        {
+          "word": "muito",
+          "start": 113.08,
+          "end": 113.69,
+          "probability": 0.94
+        },
+        {
+          "word": "mais",
+          "start": 113.69,
+          "end": 114.18,
+          "probability": 0.94
+        },
+        {
+          "word": "clara",
+          "start": 114.18,
+          "end": 114.79,
+          "probability": 0.94
+        },
+        {
+          "word": "e",
+          "start": 114.79,
+          "end": 114.91,
+          "probability": 0.94
+        },
+        {
+          "word": "confiável",
+          "start": 114.91,
+          "end": 116.02,
+          "probability": 0.94
+        },
+        {
+          "word": "para",
+          "start": 116.02,
+          "end": 116.51,
+          "probability": 0.94
+        },
+        {
+          "word": "quem",
+          "start": 116.51,
+          "end": 117.0,
+          "probability": 0.94
+        },
+        {
+          "word": "assiste.",
+          "start": 117.0,
+          "end": 118.0,
+          "probability": 0.94
+        }
+      ]
+    },
+    {
+      "start": 118.0,
+      "end": 131.0,
+      "text": "Por trás dessa descoberta está o fato de que a fala carrega toda a linha de raciocínio, enquanto o vídeo serve como apoio visual.",
+      "words": [
+        {
+          "word": "Por",
+          "start": 118.0,
+          "end": 118.37,
+          "probability": 0.94
+        },
+        {
+          "word": "trás",
+          "start": 118.37,
+          "end": 118.86,
+          "probability": 0.94
+        },
+        {
+          "word": "dessa",
+          "start": 118.86,
+          "end": 119.47,
+          "probability": 0.94
+        },
+        {
+          "word": "descoberta",
+          "start": 119.47,
+          "end": 120.7,
+          "probability": 0.94
+        },
+        {
+          "word": "está",
+          "start": 120.7,
+          "end": 121.19,
+          "probability": 0.94
+        },
+        {
+          "word": "o",
+          "start": 121.19,
+          "end": 121.31,
+          "probability": 0.94
+        },
+        {
+          "word": "fato",
+          "start": 121.31,
+          "end": 121.8,
+          "probability": 0.94
+        },
+        {
+          "word": "de",
+          "start": 121.8,
+          "end": 122.05,
+          "probability": 0.94
+        },
+        {
+          "word": "que",
+          "start": 122.05,
+          "end": 122.42,
+          "probability": 0.94
+        },
+        {
+          "word": "a",
+          "start": 122.42,
+          "end": 122.54,
+          "probability": 0.94
+        },
+        {
+          "word": "fala",
+          "start": 122.54,
+          "end": 123.03,
+          "probability": 0.94
+        },
+        {
+          "word": "carrega",
+          "start": 123.03,
+          "end": 123.89,
+          "probability": 0.94
+        },
+        {
+          "word": "toda",
+          "start": 123.89,
+          "end": 124.38,
+          "probability": 0.94
+        },
+        {
+          "word": "a",
+          "start": 124.38,
+          "end": 124.5,
+          "probability": 0.94
+        },
+        {
+          "word": "linha",
+          "start": 124.5,
+          "end": 125.11,
+          "probability": 0.94
+        },
+        {
+          "word": "de",
+          "start": 125.11,
+          "end": 125.36,
+          "probability": 0.94
+        },
+        {
+          "word": "raciocínio,",
+          "start": 125.36,
+          "end": 126.71,
+          "probability": 0.94
+        },
+        {
+          "word": "enquanto",
+          "start": 126.71,
+          "end": 127.69,
+          "probability": 0.94
+        },
+        {
+          "word": "o",
+          "start": 127.69,
+          "end": 127.81,
+          "probability": 0.94
+        },
+        {
+          "word": "vídeo",
+          "start": 127.81,
+          "end": 128.42,
+          "probability": 0.94
+        },
+        {
+          "word": "serve",
+          "start": 128.42,
+          "end": 129.03,
+          "probability": 0.94
+        },
+        {
+          "word": "como",
+          "start": 129.03,
+          "end": 129.52,
+          "probability": 0.94
+        },
+        {
+          "word": "apoio",
+          "start": 129.52,
+          "end": 130.13,
+          "probability": 0.94
+        },
+        {
+          "word": "visual.",
+          "start": 130.13,
+          "end": 131.0,
+          "probability": 0.94
+        }
+      ]
+    },
+    {
+      "start": 131.0,
+      "end": 145.0,
+      "text": "É até engraçado pensar que muita gente gasta milhares de reais numa lente nova para gravar num quarto vazio que parece uma caverna dando eco.",
+      "words": [
+        {
+          "word": "É",
+          "start": 131.0,
+          "end": 131.12,
+          "probability": 0.94
+        },
+        {
+          "word": "até",
+          "start": 131.12,
+          "end": 131.48,
+          "probability": 0.94
+        },
+        {
+          "word": "engraçado",
+          "start": 131.48,
+          "end": 132.56,
+          "probability": 0.94
+        },
+        {
+          "word": "pensar",
+          "start": 132.56,
+          "end": 133.28,
+          "probability": 0.94
+        },
+        {
+          "word": "que",
+          "start": 133.28,
+          "end": 133.64,
+          "probability": 0.94
+        },
+        {
+          "word": "muita",
+          "start": 133.64,
+          "end": 134.24,
+          "probability": 0.94
+        },
+        {
+          "word": "gente",
+          "start": 134.24,
+          "end": 134.84,
+          "probability": 0.94
+        },
+        {
+          "word": "gasta",
+          "start": 134.84,
+          "end": 135.44,
+          "probability": 0.94
+        },
+        {
+          "word": "milhares",
+          "start": 135.44,
+          "end": 136.4,
+          "probability": 0.94
+        },
+        {
+          "word": "de",
+          "start": 136.4,
+          "end": 136.64,
+          "probability": 0.94
+        },
+        {
+          "word": "reais",
+          "start": 136.64,
+          "end": 137.24,
+          "probability": 0.94
+        },
+        {
+          "word": "numa",
+          "start": 137.24,
+          "end": 137.72,
+          "probability": 0.94
+        },
+        {
+          "word": "lente",
+          "start": 137.72,
+          "end": 138.32,
+          "probability": 0.94
+        },
+        {
+          "word": "nova",
+          "start": 138.32,
+          "end": 138.8,
+          "probability": 0.94
+        },
+        {
+          "word": "para",
+          "start": 138.8,
+          "end": 139.28,
+          "probability": 0.94
+        },
+        {
+          "word": "gravar",
+          "start": 139.28,
+          "end": 140.0,
+          "probability": 0.94
+        },
+        {
+          "word": "num",
+          "start": 140.0,
+          "end": 140.36,
+          "probability": 0.94
+        },
+        {
+          "word": "quarto",
+          "start": 140.36,
+          "end": 141.08,
+          "probability": 0.94
+        },
+        {
+          "word": "vazio",
+          "start": 141.08,
+          "end": 141.68,
+          "probability": 0.94
+        },
+        {
+          "word": "que",
+          "start": 141.68,
+          "end": 142.04,
+          "probability": 0.94
+        },
+        {
+          "word": "parece",
+          "start": 142.04,
+          "end": 142.76,
+          "probability": 0.94
+        },
+        {
+          "word": "uma",
+          "start": 142.76,
+          "end": 143.12,
+          "probability": 0.94
+        },
+        {
+          "word": "caverna",
+          "start": 143.12,
+          "end": 143.96,
+          "probability": 0.94
+        },
+        {
+          "word": "dando",
+          "start": 143.96,
+          "end": 144.56,
+          "probability": 0.94
+        },
+        {
+          "word": "eco.",
+          "start": 144.56,
+          "end": 145.0,
+          "probability": 0.94
+        }
+      ]
+    },
+    {
+      "start": 145.0,
+      "end": 158.0,
+      "text": "A brincadeira entre os editores é que um cobertor pendurado atrás da câmera resolve mais problemas acústicos do que metade dos filtros caros do mercado.",
+      "words": [
+        {
+          "word": "A",
+          "start": 145.0,
+          "end": 145.1,
+          "probability": 0.94
+        },
+        {
+          "word": "brincadeira",
+          "start": 145.1,
+          "end": 146.22,
+          "probability": 0.94
+        },
+        {
+          "word": "entre",
+          "start": 146.22,
+          "end": 146.73,
+          "probability": 0.94
+        },
+        {
+          "word": "os",
+          "start": 146.73,
+          "end": 146.93,
+          "probability": 0.94
+        },
+        {
+          "word": "editores",
+          "start": 146.93,
+          "end": 147.74,
+          "probability": 0.94
+        },
+        {
+          "word": "é",
+          "start": 147.74,
+          "end": 147.84,
+          "probability": 0.94
+        },
+        {
+          "word": "que",
+          "start": 147.84,
+          "end": 148.14,
+          "probability": 0.94
+        },
+        {
+          "word": "um",
+          "start": 148.14,
+          "end": 148.34,
+          "probability": 0.94
+        },
+        {
+          "word": "cobertor",
+          "start": 148.34,
+          "end": 149.15,
+          "probability": 0.94
+        },
+        {
+          "word": "pendurado",
+          "start": 149.15,
+          "end": 150.06,
+          "probability": 0.94
+        },
+        {
+          "word": "atrás",
+          "start": 150.06,
+          "end": 150.57,
+          "probability": 0.94
+        },
+        {
+          "word": "da",
+          "start": 150.57,
+          "end": 150.77,
+          "probability": 0.94
+        },
+        {
+          "word": "câmera",
+          "start": 150.77,
+          "end": 151.38,
+          "probability": 0.94
+        },
+        {
+          "word": "resolve",
+          "start": 151.38,
+          "end": 152.09,
+          "probability": 0.94
+        },
+        {
+          "word": "mais",
+          "start": 152.09,
+          "end": 152.5,
+          "probability": 0.94
+        },
+        {
+          "word": "problemas",
+          "start": 152.5,
+          "end": 153.41,
+          "probability": 0.94
+        },
+        {
+          "word": "acústicos",
+          "start": 153.41,
+          "end": 154.32,
+          "probability": 0.94
+        },
+        {
+          "word": "do",
+          "start": 154.32,
+          "end": 154.52,
+          "probability": 0.94
+        },
+        {
+          "word": "que",
+          "start": 154.52,
+          "end": 154.82,
+          "probability": 0.94
+        },
+        {
+          "word": "metade",
+          "start": 154.82,
+          "end": 155.43,
+          "probability": 0.94
+        },
+        {
+          "word": "dos",
+          "start": 155.43,
+          "end": 155.73,
+          "probability": 0.94
+        },
+        {
+          "word": "filtros",
+          "start": 155.73,
+          "end": 156.44,
+          "probability": 0.94
+        },
+        {
+          "word": "caros",
+          "start": 156.44,
+          "end": 156.95,
+          "probability": 0.94
+        },
+        {
+          "word": "do",
+          "start": 156.95,
+          "end": 157.15,
+          "probability": 0.94
+        },
+        {
+          "word": "mercado.",
+          "start": 157.15,
+          "end": 158.0,
+          "probability": 0.94
+        }
+      ]
+    },
+    {
+      "start": 158.0,
+      "end": 169.5,
+      "text": "No fim das contas é divertido perceber que a solução mais simples quase sempre vence a complicação técnica.",
+      "words": [
+        {
+          "word": "No",
+          "start": 158.0,
+          "end": 158.26,
+          "probability": 0.94
+        },
+        {
+          "word": "fim",
+          "start": 158.26,
+          "end": 158.64,
+          "probability": 0.94
+        },
+        {
+          "word": "das",
+          "start": 158.64,
+          "end": 159.02,
+          "probability": 0.94
+        },
+        {
+          "word": "contas",
+          "start": 159.02,
+          "end": 159.79,
+          "probability": 0.94
+        },
+        {
+          "word": "é",
+          "start": 159.79,
+          "end": 159.92,
+          "probability": 0.94
+        },
+        {
+          "word": "divertido",
+          "start": 159.92,
+          "end": 161.07,
+          "probability": 0.94
+        },
+        {
+          "word": "perceber",
+          "start": 161.07,
+          "end": 162.09,
+          "probability": 0.94
+        },
+        {
+          "word": "que",
+          "start": 162.09,
+          "end": 162.47,
+          "probability": 0.94
+        },
+        {
+          "word": "a",
+          "start": 162.47,
+          "end": 162.6,
+          "probability": 0.94
+        },
+        {
+          "word": "solução",
+          "start": 162.6,
+          "end": 163.49,
+          "probability": 0.94
+        },
+        {
+          "word": "mais",
+          "start": 163.49,
+          "end": 164.0,
+          "probability": 0.94
+        },
+        {
+          "word": "simples",
+          "start": 164.0,
+          "end": 164.89,
+          "probability": 0.94
+        },
+        {
+          "word": "quase",
+          "start": 164.89,
+          "end": 165.53,
+          "probability": 0.94
+        },
+        {
+          "word": "sempre",
+          "start": 165.53,
+          "end": 166.3,
+          "probability": 0.94
+        },
+        {
+          "word": "vence",
+          "start": 166.3,
+          "end": 166.94,
+          "probability": 0.94
+        },
+        {
+          "word": "a",
+          "start": 166.94,
+          "end": 167.07,
+          "probability": 0.94
+        },
+        {
+          "word": "complicação",
+          "start": 167.07,
+          "end": 168.48,
+          "probability": 0.94
+        },
+        {
+          "word": "técnica.",
+          "start": 168.48,
+          "end": 169.5,
+          "probability": 0.94
+        }
+      ]
+    },
+    {
+      "start": 169.5,
+      "end": 184.0,
+      "text": "Na minha opinião, o erro comum de muitos criadores é tentar cortar frases soltas fora de contexto apenas para parecer polêmico.",
+      "words": [
+        {
+          "word": "Na",
+          "start": 169.5,
+          "end": 169.77,
+          "probability": 0.94
+        },
+        {
+          "word": "minha",
+          "start": 169.77,
+          "end": 170.45,
+          "probability": 0.94
+        },
+        {
+          "word": "opinião,",
+          "start": 170.45,
+          "end": 171.53,
+          "probability": 0.94
+        },
+        {
+          "word": "o",
+          "start": 171.53,
+          "end": 171.67,
+          "probability": 0.94
+        },
+        {
+          "word": "erro",
+          "start": 171.67,
+          "end": 172.21,
+          "probability": 0.94
+        },
+        {
+          "word": "comum",
+          "start": 172.21,
+          "end": 172.89,
+          "probability": 0.94
+        },
+        {
+          "word": "de",
+          "start": 172.89,
+          "end": 173.16,
+          "probability": 0.94
+        },
+        {
+          "word": "muitos",
+          "start": 173.16,
+          "end": 173.97,
+          "probability": 0.94
+        },
+        {
+          "word": "criadores",
+          "start": 173.97,
+          "end": 175.19,
+          "probability": 0.94
+        },
+        {
+          "word": "é",
+          "start": 175.19,
+          "end": 175.33,
+          "probability": 0.94
+        },
+        {
+          "word": "tentar",
+          "start": 175.33,
+          "end": 176.14,
+          "probability": 0.94
+        },
+        {
+          "word": "cortar",
+          "start": 176.14,
+          "end": 176.95,
+          "probability": 0.94
+        },
+        {
+          "word": "frases",
+          "start": 176.95,
+          "end": 177.76,
+          "probability": 0.94
+        },
+        {
+          "word": "soltas",
+          "start": 177.76,
+          "end": 178.57,
+          "probability": 0.94
+        },
+        {
+          "word": "fora",
+          "start": 178.57,
+          "end": 179.11,
+          "probability": 0.94
+        },
+        {
+          "word": "de",
+          "start": 179.11,
+          "end": 179.38,
+          "probability": 0.94
+        },
+        {
+          "word": "contexto",
+          "start": 179.38,
+          "end": 180.46,
+          "probability": 0.94
+        },
+        {
+          "word": "apenas",
+          "start": 180.46,
+          "end": 181.27,
+          "probability": 0.94
+        },
+        {
+          "word": "para",
+          "start": 181.27,
+          "end": 181.81,
+          "probability": 0.94
+        },
+        {
+          "word": "parecer",
+          "start": 181.81,
+          "end": 182.76,
+          "probability": 0.94
+        },
+        {
+          "word": "polêmico.",
+          "start": 182.76,
+          "end": 184.0,
+          "probability": 0.94
+        }
+      ]
+    },
+    {
+      "start": 184.0,
+      "end": 198.5,
+      "text": "Para explicar como funciona um bom recorte vertical, precisamos preservar o início da ideia, a justificativa central e a conclusão completa do raciocínio.",
+      "words": [
+        {
+          "word": "Para",
+          "start": 184.0,
+          "end": 184.44,
+          "probability": 0.94
+        },
+        {
+          "word": "explicar",
+          "start": 184.44,
+          "end": 185.32,
+          "probability": 0.94
+        },
+        {
+          "word": "como",
+          "start": 185.32,
+          "end": 185.76,
+          "probability": 0.94
+        },
+        {
+          "word": "funciona",
+          "start": 185.76,
+          "end": 186.64,
+          "probability": 0.94
+        },
+        {
+          "word": "um",
+          "start": 186.64,
+          "end": 186.86,
+          "probability": 0.94
+        },
+        {
+          "word": "bom",
+          "start": 186.86,
+          "end": 187.19,
+          "probability": 0.94
+        },
+        {
+          "word": "recorte",
+          "start": 187.19,
+          "end": 187.96,
+          "probability": 0.94
+        },
+        {
+          "word": "vertical,",
+          "start": 187.96,
+          "end": 188.95,
+          "probability": 0.94
+        },
+        {
+          "word": "precisamos",
+          "start": 188.95,
+          "end": 190.05,
+          "probability": 0.94
+        },
+        {
+          "word": "preservar",
+          "start": 190.05,
+          "end": 191.04,
+          "probability": 0.94
+        },
+        {
+          "word": "o",
+          "start": 191.04,
+          "end": 191.15,
+          "probability": 0.94
+        },
+        {
+          "word": "início",
+          "start": 191.15,
+          "end": 191.81,
+          "probability": 0.94
+        },
+        {
+          "word": "da",
+          "start": 191.81,
+          "end": 192.03,
+          "probability": 0.94
+        },
+        {
+          "word": "ideia,",
+          "start": 192.03,
+          "end": 192.69,
+          "probability": 0.94
+        },
+        {
+          "word": "a",
+          "start": 192.69,
+          "end": 192.8,
+          "probability": 0.94
+        },
+        {
+          "word": "justificativa",
+          "start": 192.8,
+          "end": 194.23,
+          "probability": 0.94
+        },
+        {
+          "word": "central",
+          "start": 194.23,
+          "end": 195.0,
+          "probability": 0.94
+        },
+        {
+          "word": "e",
+          "start": 195.0,
+          "end": 195.11,
+          "probability": 0.94
+        },
+        {
+          "word": "a",
+          "start": 195.11,
+          "end": 195.22,
+          "probability": 0.94
+        },
+        {
+          "word": "conclusão",
+          "start": 195.22,
+          "end": 196.21,
+          "probability": 0.94
+        },
+        {
+          "word": "completa",
+          "start": 196.21,
+          "end": 197.09,
+          "probability": 0.94
+        },
+        {
+          "word": "do",
+          "start": 197.09,
+          "end": 197.31,
+          "probability": 0.94
+        },
+        {
+          "word": "raciocínio.",
+          "start": 197.31,
+          "end": 198.5,
+          "probability": 0.94
+        }
+      ]
+    },
+    {
+      "start": 198.5,
+      "end": 212.0,
+      "text": "Em resumo, quando o espectador entende o conceito do início ao fim sem precisar adivinhar o que veio antes, o corte cumpre seu papel educativo.",
+      "words": [
+        {
+          "word": "Em",
+          "start": 198.5,
+          "end": 198.73,
+          "probability": 0.94
+        },
+        {
+          "word": "resumo,",
+          "start": 198.73,
+          "end": 199.52,
+          "probability": 0.94
+        },
+        {
+          "word": "quando",
+          "start": 199.52,
+          "end": 200.2,
+          "probability": 0.94
+        },
+        {
+          "word": "o",
+          "start": 200.2,
+          "end": 200.31,
+          "probability": 0.94
+        },
+        {
+          "word": "espectador",
+          "start": 200.31,
+          "end": 201.44,
+          "probability": 0.94
+        },
+        {
+          "word": "entende",
+          "start": 201.44,
+          "end": 202.23,
+          "probability": 0.94
+        },
+        {
+          "word": "o",
+          "start": 202.23,
+          "end": 202.34,
+          "probability": 0.94
+        },
+        {
+          "word": "conceito",
+          "start": 202.34,
+          "end": 203.25,
+          "probability": 0.94
+        },
+        {
+          "word": "do",
+          "start": 203.25,
+          "end": 203.48,
+          "probability": 0.94
+        },
+        {
+          "word": "início",
+          "start": 203.48,
+          "end": 204.16,
+          "probability": 0.94
+        },
+        {
+          "word": "ao",
+          "start": 204.16,
+          "end": 204.39,
+          "probability": 0.94
+        },
+        {
+          "word": "fim",
+          "start": 204.39,
+          "end": 204.73,
+          "probability": 0.94
+        },
+        {
+          "word": "sem",
+          "start": 204.73,
+          "end": 205.07,
+          "probability": 0.94
+        },
+        {
+          "word": "precisar",
+          "start": 205.07,
+          "end": 205.98,
+          "probability": 0.94
+        },
+        {
+          "word": "adivinhar",
+          "start": 205.98,
+          "end": 207.0,
+          "probability": 0.94
+        },
+        {
+          "word": "o",
+          "start": 207.0,
+          "end": 207.11,
+          "probability": 0.94
+        },
+        {
+          "word": "que",
+          "start": 207.11,
+          "end": 207.45,
+          "probability": 0.94
+        },
+        {
+          "word": "veio",
+          "start": 207.45,
+          "end": 207.9,
+          "probability": 0.94
+        },
+        {
+          "word": "antes,",
+          "start": 207.9,
+          "end": 208.58,
+          "probability": 0.94
+        },
+        {
+          "word": "o",
+          "start": 208.58,
+          "end": 208.69,
+          "probability": 0.94
+        },
+        {
+          "word": "corte",
+          "start": 208.69,
+          "end": 209.26,
+          "probability": 0.94
+        },
+        {
+          "word": "cumpre",
+          "start": 209.26,
+          "end": 209.94,
+          "probability": 0.94
+        },
+        {
+          "word": "seu",
+          "start": 209.94,
+          "end": 210.28,
+          "probability": 0.94
+        },
+        {
+          "word": "papel",
+          "start": 210.28,
+          "end": 210.85,
+          "probability": 0.94
+        },
+        {
+          "word": "educativo.",
+          "start": 210.85,
+          "end": 212.0,
+          "probability": 0.94
+        }
+      ]
+    }
+  ]
+}
