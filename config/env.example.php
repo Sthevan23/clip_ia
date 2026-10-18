@@ -2,13 +2,11 @@
 /**
  * ClipIA - Arquivo de Exemplo de Credenciais (NÃO VERSIONAR CREDENCIAIS REAIS)
  *
- * Para usar em produção (Hostinger Business):
- * 1. Recomendado (fora da pasta pública): crie `/home/u123456789/clipia_secrets/env.production.php`
- *    (um nível acima de `public_html`) com permissão `0600` e cole este conteúdo.
- * 2. Alternativa local: copie para `config/env.local.php` (protegido por `.htaccess`).
- * 3. Preencha os dados reais do banco MySQL criado no hPanel da Hostinger.
- * 4. Defina um segredo forte em `WORKER_SHARED_SECRET` (mínimo 32 caracteres aleatórios)
- *    que também será usado em `CLIPIA_WORKER_SHARED_SECRET` no `.env` do serviço Python externo.
+ * Para produção na Hostinger, prefira o modelo dedicado:
+ *   config/env.production.example.php
+ * (copie o conteúdo para ~/clipia_secrets/env.production.php fora de public_html).
+ *
+ * Desenvolvimento local: copie para config/env.local.php (gitignored).
  */
 
 return [

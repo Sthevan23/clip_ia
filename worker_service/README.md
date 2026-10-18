@@ -52,6 +52,33 @@ Principais variáveis em `worker_service/.env`:
 
 ---
 
+## 2.1. Worker local + painel PHP na Hostinger (Auto Deploy Git)
+
+O repositório publica **somente o PHP** na Hostinger. O worker roda **no seu PC** (Windows) e fala com `pages/worker-api.php` via **HTTPS + HMAC**.
+
+1. Copie `.env.example` → **`.env`** (o `.env` está no `.gitignore` e **nunca** vai no Auto Deploy).
+2. Em `.env`, para produção:
+   - `CLIPIA_BACKEND_API_URL=https://clipia.sthevandev.com.br/pages/worker-api.php`
+   - `CLIPIA_WORKER_SHARED_SECRET=` mesmo valor de `WORKER_SHARED_SECRET` no `env.production.php` (fora do `public_html`)
+   - `CLIPIA_VERIFY_TLS=true`
+   - `CLIPIA_AI_PROVIDER=local_heuristic`
+   - `CLIPIA_ALLOW_PAID_API=false`
+3. Verifique **sem chamar a API**:
+   ```powershell
+   cd worker_service
+   python verify_local_config.py
+   ```
+4. Quando `hmac_ready=True`, teste a fila (smoke) ou processe um job:
+   ```powershell
+   python main.py --process-next
+   # ou modo contínuo:
+   python main.py --poll 15
+   ```
+
+Arquivos de integração no PHP: `pages/worker-api.php`, `includes/worker_client.php`, `config/app.php` (`WORKER_SHARED_SECRET`, `WORKER_REQUIRE_HTTPS`).
+
+---
+
 ## 3. Execução dos Testes no Windows PowerShell
 
 Na raiz do repositório (`projeto_clips`), execute:

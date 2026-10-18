@@ -30,6 +30,8 @@ __pycache__/
 /storage/budget_ledger.lock
 /storage/single_worker.lock
 /storage/audit_*.log
+/storage/local_*.json
+/storage/*_free_test.json
 /uploads/videos/*
 !/uploads/videos/.gitkeep
 

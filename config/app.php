@@ -6,30 +6,11 @@ declare(strict_types=1);
  * Compatível com PHP 8.2+ em hospedagem compartilhada (Hostinger Business)
  */
 
-// 1. Busca arquivo de credenciais prioritariamente FORA da pasta pública (`public_html`)
-//    Ex.: /home/u123456789/clipia_secrets/env.production.php ou ../clipia_env.php
-$candidateEnvFiles = [];
-$customEnvPath = getenv('CLIPIA_ENV_FILE') ?: ($_ENV['CLIPIA_ENV_FILE'] ?? '');
-if (is_string($customEnvPath) && $customEnvPath !== '') {
-    $candidateEnvFiles[] = $customEnvPath;
-}
-$projectRootDir = dirname(__DIR__);
-$parentOfPublicRoot = dirname($projectRootDir);
-$domainRootDir = dirname($parentOfPublicRoot);
-$candidateEnvFiles[] = $parentOfPublicRoot . '/clipia_secrets/env.production.php';
-$candidateEnvFiles[] = $parentOfPublicRoot . '/clipia_env.php';
-$candidateEnvFiles[] = $domainRootDir . '/private/clipia.env.php';
-$candidateEnvFiles[] = __DIR__ . '/env.local.php';
-
-$localEnv = [];
-foreach ($candidateEnvFiles as $envFileCandidate) {
-    if (is_string($envFileCandidate) && $envFileCandidate !== '' && is_file($envFileCandidate) && is_readable($envFileCandidate)) {
-        $loaded = include $envFileCandidate;
-        if (is_array($loaded)) {
-            $localEnv = array_merge($localEnv, $loaded);
-        }
-    }
-}
+// 1. Credenciais: arquivos fora de public_html + env.local só em não-produção (ver config/clipia_env_loader.php)
+require_once __DIR__ . '/clipia_env_loader.php';
+$clipiaEnvBootstrap = clipia_bootstrap_environment();
+$localEnv = $clipiaEnvBootstrap['localEnv'];
+$projectRootDir = $clipiaEnvBootstrap['projectRootDir'];
 
 if (!function_exists('clipia_env')) {
     function clipia_env(string $key, string $default = ''): string
@@ -73,7 +54,8 @@ if (!function_exists('clipia_is_https_request')) {
 if (!defined('APP_NAME')) {
     define('APP_NAME', 'ClipIA');
     define('APP_VERSION', '0.5.0-prod-ready');
-    define('APP_ENV', clipia_env('APP_ENV', 'development'));
+    $defaultAppEnv = clipia_hosting_layout_detected() ? 'production' : 'development';
+    define('APP_ENV', clipia_env('APP_ENV', $defaultAppEnv));
     define('APP_TIMEZONE', clipia_env('APP_TIMEZONE', 'America/Sao_Paulo'));
 
     date_default_timezone_set(APP_TIMEZONE);
@@ -149,6 +131,8 @@ if (!defined('APP_NAME')) {
     define('ADMIN_OWNER_EMAIL', clipia_env('ADMIN_OWNER_EMAIL', APP_ENV === 'production' ? '' : 'admin@clipia.local'));
     define('ADMIN_OWNER_PASSWORD_HASH', clipia_env('ADMIN_OWNER_PASSWORD_HASH', ''));
     define('ADMIN_OWNER_PASSWORD', clipia_env('ADMIN_OWNER_PASSWORD', APP_ENV === 'production' ? '' : 'AdminClipIA123!'));
+
+    clipia_abort_if_production_misconfigured();
 }
 
 // Configuração de Sessão Segura (inicia apenas em rotas de navegador, não na API machine-to-machine do worker)
