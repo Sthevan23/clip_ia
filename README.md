@@ -21,6 +21,8 @@ O **ClipIA** é uma aplicação web desenvolvida em **PHP 8.2+**, **MySQL (PDO)*
 
 ## 2. Checklist de Publicação na Hostinger Business
 
+**Pacote pronto para FTP:** na raiz do projeto execute `.\deploy\build-hostinger-package.ps1` — gera `deploy/clipia-hostinger-public.zip` (só PHP para `public_html/`). Detalhes em [`deploy/HOSTINGER.md`](deploy/HOSTINGER.md).
+
 ### 2.1. Variáveis do Backend PHP (`/home/uXXXXXXXXX/clipia_secrets/env.production.php`)
 
 Crie a pasta `/home/uXXXXXXXXX/clipia_secrets` **fora de `public_html`** (permissão `0700`) e o arquivo `env.production.php` (permissão `0600`):

@@ -10,16 +10,26 @@ worker_service/.env.*
 *.key
 *.pem
 
+# Python (worker local — não versionar bytecode)
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+
 # Uploads, locks e dados locais de execução
 /storage/uploads/*
 !/storage/uploads/.gitkeep
+!/storage/uploads/.htaccess
 /storage/clips/*
 !/storage/clips/.gitkeep
+!/storage/clips/.htaccess
 /storage/logs/*
 !/storage/logs/.gitkeep
 /storage/budget_ledger.json
 /storage/budget_ledger.lock
 /storage/single_worker.lock
+/storage/audit_*.log
 /uploads/videos/*
 !/uploads/videos/.gitkeep
 
@@ -30,9 +40,12 @@ worker_service/.env.*
 /storage/*.db
 /tests/*.sqlite
 
+# Pacote gerado para Hostinger (deploy/build-hostinger-package.ps1)
+/deploy/staging-hostinger/
+/deploy/*.zip
+
 # Logs e arquivos temporários
 *.log
 *.bak
 .DS_Store
 Thumbs.db
-
