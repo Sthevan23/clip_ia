@@ -238,7 +238,8 @@ class UserRepository
                 ':updated_at'           => $now,
             ]);
 
-            return $stmt->rowCount() === 1;
+            // MySQL/PDO: rowCount() após INSERT…SELECT nem sempre reflete linha inserida.
+            return self::findByEmail($normalizedEmail) !== null;
         } catch (Throwable $e) {
             error_log('[ClipIA insertOwnerUserIfTableEmpty] ' . $e->getMessage());
             return false;
@@ -283,6 +284,87 @@ class UserRepository
      *
      * @return bool true se criou o usuário nesta requisição
      */
+    /**
+     * Recuperação controlada (owner-setup-once.php): atualiza senha do e-mail ou cria se users vazio.
+     */
+    public static function applyOwnerRecoveryCredentials(string $email, string $password): bool
+    {
+        if (!self::isOwnerPasswordAcceptable($password)) {
+            return false;
+        }
+
+        $normalizedEmail = mb_strtolower(trim($email));
+        if ($normalizedEmail === '' || !filter_var($normalizedEmail, FILTER_VALIDATE_EMAIL)) {
+            return false;
+        }
+
+        $pdo = Database::getConnection();
+        if ($pdo === null) {
+            return false;
+        }
+
+        $hash = password_hash($password, PASSWORD_DEFAULT);
+        $existing = self::findByEmail($normalizedEmail);
+        if ($existing !== null) {
+            try {
+                $stmt = $pdo->prepare(
+                    'UPDATE users SET password_hash = :hash, updated_at = :now WHERE id = :id'
+                );
+                $stmt->execute([
+                    ':hash' => $hash,
+                    ':now'  => date('Y-m-d H:i:s'),
+                    ':id'   => (int)$existing['id'],
+                ]);
+
+                return $stmt->rowCount() >= 1;
+            } catch (Throwable $e) {
+                error_log('[ClipIA applyOwnerRecoveryCredentials update] ' . $e->getMessage());
+                return false;
+            }
+        }
+
+        if (self::countUsers() > 0) {
+            return false;
+        }
+
+        $ownerName = trim((string)ADMIN_OWNER_NAME) ?: 'Administrador ClipIA';
+        try {
+            $now = date('Y-m-d H:i:s');
+            $stmt = $pdo->prepare(
+                'INSERT INTO users (
+                    name, email, password_hash, plan_tier,
+                    default_aspect_ratio, default_clips_count,
+                    default_min_duration, default_max_duration,
+                    email_notifications, accepted_terms_at, created_at, updated_at
+                ) VALUES (
+                    :name, :email, :password_hash, :plan_tier,
+                    :default_aspect_ratio, :default_clips_count,
+                    :default_min_duration, :default_max_duration,
+                    :email_notifications, :accepted_terms_at, :created_at, :updated_at
+                )'
+            );
+            $stmt->execute([
+                ':name'                 => $ownerName,
+                ':email'                => $normalizedEmail,
+                ':password_hash'        => $hash,
+                ':plan_tier'            => 'owner',
+                ':default_aspect_ratio' => CLIP_DEFAULT_FORMAT,
+                ':default_clips_count'  => CLIP_DEFAULT_COUNT,
+                ':default_min_duration' => CLIP_DEFAULT_MIN_DURATION,
+                ':default_max_duration' => CLIP_DEFAULT_MAX_DURATION,
+                ':email_notifications'  => 1,
+                ':accepted_terms_at'    => $now,
+                ':created_at'           => $now,
+                ':updated_at'           => $now,
+            ]);
+
+            return self::findByEmail($normalizedEmail) !== null;
+        } catch (Throwable $e) {
+            error_log('[ClipIA applyOwnerRecoveryCredentials insert] ' . $e->getMessage());
+            return false;
+        }
+    }
+
     public static function bootstrapOwnerFromFirstLoginIfAllowed(string $email, string $password): bool
     {
         if (!defined('CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN') || !CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN) {
