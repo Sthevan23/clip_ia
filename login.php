@@ -74,15 +74,7 @@ require_once __DIR__ . '/includes/header.php';
 
     <section class="auth-card" aria-labelledby="login-title">
         <div class="auth-header">
-            <h1 id="login-title" class="auth-title">Acesso Administrativo</h1>
-            <p class="auth-subtitle">
-                Uso exclusivo do proprietário.
-                <?php if (defined('CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN') && CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN): ?>
-                    Com o banco sem usuários, este login pode <strong>criar</strong> a conta administrativa (senha 8–256 caracteres). Desative o bootstrap no env privado após entrar.
-                <?php else: ?>
-                    Use as credenciais definidas no env privado (<code>ADMIN_OWNER_*</code>) ou habilite temporariamente <code>CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN=1</code> para o primeiro acesso.
-                <?php endif; ?>
-            </p>
+            <h1 id="login-title" class="auth-title">Entrar</h1>
         </div>
 
         <?php render_flash_container(); ?>
