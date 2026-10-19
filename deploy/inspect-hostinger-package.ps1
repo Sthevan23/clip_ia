@@ -12,7 +12,7 @@ $DeployDir = $PSScriptRoot
 $ProjectRoot = Split-Path -Parent $DeployDir
 $ZipPath = Join-Path $DeployDir 'clipia-hostinger-public.zip'
 $BuildScript = Join-Path $DeployDir 'build-hostinger-package.ps1'
-$ExpectedEntryCount = 47
+$ExpectedEntryCount = 48
 $ExitCode = 0
 
 function Write-InspectError {
