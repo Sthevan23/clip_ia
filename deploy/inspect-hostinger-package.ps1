@@ -1,9 +1,10 @@
-# Inspeciona deploy/clipia-hostinger-public.zip (caminho absoluto a partir de deploy/).
-# Uso: na raiz do projeto:  .\deploy\inspect-hostinger-package.ps1
-#      opcional:            .\deploy\inspect-hostinger-package.ps1 -Build
+# Inspeciona pacote publico Hostinger (ZIP ou pasta espelho).
+# Uso:  .\deploy\inspect-hostinger-package.ps1
+#       .\deploy\inspect-hostinger-package.ps1 -DirectoryPath .\deploy\hostinger-public
 
 param(
-    [switch]$Build
+    [switch]$Build,
+    [string]$DirectoryPath = ''
 )
 
 $ErrorActionPreference = 'Stop'
@@ -20,8 +21,87 @@ function Write-InspectError {
     $script:ExitCode = 1
 }
 
+function Get-ZipEntryUtf8Text {
+    param(
+        [System.IO.Compression.ZipArchive]$Archive,
+        [string[]]$CandidatePaths
+    )
+    foreach ($candidate in $CandidatePaths) {
+        $normalized = $candidate.Replace('\', '/').TrimStart('/')
+        $entry = $Archive.GetEntry($normalized)
+        if ($null -eq $entry) {
+            $entry = $Archive.Entries |
+                Where-Object { $_.FullName.Replace('/', '\') -ieq $candidate.Replace('/', '\') } |
+                Select-Object -First 1
+        }
+        if ($null -eq $entry) {
+            continue
+        }
+        $stream = $null
+        try {
+            $stream = $entry.Open()
+            $reader = [System.IO.StreamReader]::new($stream, [System.Text.Encoding]::UTF8, $true)
+            try {
+                return $reader.ReadToEnd()
+            }
+            finally {
+                $reader.Dispose()
+            }
+        }
+        finally {
+            if ($null -ne $stream) {
+                $stream.Dispose()
+            }
+        }
+    }
+    return $null
+}
+
+function Test-PublicTextContains {
+    param(
+        [string]$Label,
+        [string]$Text,
+        [string[]]$Needles
+    )
+    if ($null -eq $Text -or $Text.Length -eq 0) {
+        Write-InspectError ($Label + ': conteudo ausente ou ilegivel no pacote')
+        return $false
+    }
+    foreach ($needle in $Needles) {
+        if ($Text.IndexOf($needle, [StringComparison]::Ordinal) -lt 0) {
+            Write-InspectError ($Label + ': marcador ausente no pacote: ' + $needle)
+            return $false
+        }
+    }
+    return $true
+}
+
+function Get-PublicEntryUtf8Text {
+    param(
+        [string]$RootDir,
+        [string[]]$CandidatePaths
+    )
+    foreach ($candidate in $CandidatePaths) {
+        $full = Join-Path $RootDir ($candidate.Replace('/', '\'))
+        if (Test-Path -LiteralPath $full) {
+            return [System.IO.File]::ReadAllText($full, [System.Text.Encoding]::UTF8)
+        }
+    }
+    return $null
+}
+
+$InspectDirectory = $DirectoryPath -ne ''
+if ($InspectDirectory) {
+    $DirectoryPath = (Resolve-Path -LiteralPath $DirectoryPath).Path
+}
+
 Write-Host ('Projeto: ' + $ProjectRoot)
-Write-Host ('ZIP alvo: ' + $ZipPath)
+if ($InspectDirectory) {
+    Write-Host ('Pasta alvo: ' + $DirectoryPath)
+}
+else {
+    Write-Host ('ZIP alvo: ' + $ZipPath)
+}
 
 if ($Build) {
     if (-not (Test-Path -LiteralPath $BuildScript)) {
@@ -36,27 +116,43 @@ if ($Build) {
     }
 }
 
-if (-not (Test-Path -LiteralPath $ZipPath)) {
+if ($InspectDirectory) {
+    if (-not (Test-Path -LiteralPath $DirectoryPath)) {
+        Write-InspectError ('Pasta publica nao encontrada: ' + $DirectoryPath)
+        exit 1
+    }
+}
+elseif (-not (Test-Path -LiteralPath $ZipPath)) {
     Write-InspectError ('Arquivo ZIP nao encontrado. Caminho esperado: ' + $ZipPath)
     Write-Host 'Dica: execute na raiz do repo: .\deploy\build-hostinger-package.ps1' -ForegroundColor Yellow
     Write-Host 'Nao use caminho relativo deploy\... com cwd em worker_service\.' -ForegroundColor Yellow
     exit 1
 }
 
-Add-Type -AssemblyName System.IO.Compression.FileSystem
 $zip = $null
-try {
-    $zip = [System.IO.Compression.ZipFile]::OpenRead($ZipPath)
-}
-catch {
-    Write-InspectError ('Falha ao abrir ZIP: ' + $_.Exception.Message)
-    exit 1
+if (-not $InspectDirectory) {
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    try {
+        $zip = [System.IO.Compression.ZipFile]::OpenRead($ZipPath)
+    }
+    catch {
+        Write-InspectError ('Falha ao abrir ZIP: ' + $_.Exception.Message)
+        exit 1
+    }
 }
 
 try {
-    $entries = @($zip.Entries | ForEach-Object { $_.FullName.Replace('/', '\') } | Sort-Object)
+    if ($InspectDirectory) {
+        $rootLen = $DirectoryPath.Length
+        $entries = @(Get-ChildItem -LiteralPath $DirectoryPath -Recurse -File | ForEach-Object {
+            $_.FullName.Substring($rootLen).TrimStart('\', '/')
+        } | Sort-Object)
+    }
+    else {
+        $entries = @($zip.Entries | ForEach-Object { $_.FullName.Replace('/', '\') } | Sort-Object)
+    }
     $count = $entries.Count
-    Write-Host ('Entradas no ZIP: ' + $count)
+    Write-Host ('Arquivos no pacote: ' + $count)
 
     if ($count -ne $ExpectedEntryCount) {
         Write-Host ('AVISO: esperado ' + $ExpectedEntryCount + ' entradas; encontrado ' + $count + '.') -ForegroundColor Yellow
@@ -103,8 +199,42 @@ try {
     foreach ($req in $required) {
         $found = $entries | Where-Object { $_ -ieq $req }
         if (-not $found) {
-            Write-InspectError ('Arquivo obrigatorio ausente no ZIP: ' + $req)
+            Write-InspectError ('Arquivo obrigatorio ausente no pacote: ' + $req)
         }
+    }
+
+    Write-Host '==> Conteudo critico (login/bootstrap) no pacote' -ForegroundColor Cyan
+    if ($InspectDirectory) {
+        $loginText = Get-PublicEntryUtf8Text -RootDir $DirectoryPath -CandidatePaths @('login.php')
+        $repoText = Get-PublicEntryUtf8Text -RootDir $DirectoryPath -CandidatePaths @(
+            'includes\repositories.php',
+            'includes/repositories.php'
+        )
+    }
+    else {
+        $loginText = Get-ZipEntryUtf8Text -Archive $zip -CandidatePaths @('login.php', 'Login.php')
+        $repoText = Get-ZipEntryUtf8Text -Archive $zip -CandidatePaths @(
+            'includes/repositories.php',
+            'includes\repositories.php'
+        )
+    }
+
+    $loginBootstrapOk = Test-PublicTextContains -Label 'login.php' -Text $loginText -Needles @(
+        'bootstrapOwnerFromFirstLoginIfAllowed',
+        "defined('CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN')"
+    )
+    $repoBootstrapOk = Test-PublicTextContains -Label 'includes/repositories.php' -Text $repoText -Needles @(
+        'bootstrapOwnerFromFirstLoginIfAllowed',
+        'insertOwnerUserIfTableEmpty'
+    )
+
+    $zipLoginHasBootstrapFlag = if ($loginBootstrapOk) { 'True' } else { 'False' }
+    $zipRepoHasBootstrap = if ($repoBootstrapOk) { 'True' } else { 'False' }
+    Write-Host ('zip_login_has_bootstrap_flag=' + $zipLoginHasBootstrapFlag)
+    Write-Host ('zip_repositories_has_bootstrap=' + $zipRepoHasBootstrap)
+
+    if (-not $loginBootstrapOk -or -not $repoBootstrapOk) {
+        $script:ExitCode = 1
     }
 
     if ($ExitCode -eq 0) {

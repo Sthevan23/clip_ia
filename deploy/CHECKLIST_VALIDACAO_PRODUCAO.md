@@ -26,7 +26,7 @@
 | Validação 503 | `DB_NAME`, `DB_USER`, `WORKER_SHARED_SECRET` (≥16), recomenda `APP_URL`; exige **`private/clipia.env.php` carregado** em layout `public_html` | Comparar com chaves do `env.production.example.php` |
 | **`DB_PASS`** | Necessário para PDO em `config/database.php`; **não** entra na lista do 503 | Preencher no servidor; falha = mensagem genérica de banco no login |
 | MySQL | `config/schema.sql` — **8 tabelas** (ver seção C) | Contar `CREATE TABLE` no repo |
-| Admin inicial | `login.php` → `ensureOwnerAccountIfEmpty()` só se `COUNT(users)=0`; exige `ADMIN_OWNER_EMAIL` + `ADMIN_OWNER_PASSWORD_HASH` em produção | Ler `includes/repositories.php` |
+| Admin inicial | `ensureOwnerAccountIfEmpty()` (env hash) **ou** `bootstrapOwnerFromFirstLoginIfAllowed()` se `CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN=1` e `users` vazia | Padrão bootstrap **0**; ver `GUIA_PUBLICACAO_MANUAL.md` §5 |
 | Login | `password_verify()`; mensagem genérica se falhar | — |
 | Cadastro público | `register.php` bloqueado (`PUBLIC_REGISTRATION_ENABLED=false`) | — |
 
@@ -94,7 +94,8 @@ Escala sugerida: `OK` · `FALHA` · `N/A` · `PENDENTE`
 | # | Passo | Como verificar | Resultado |
 |---|--------|----------------|-----------|
 | D.1.1 | Worker configurado | `.\deploy\verify-local.ps1` → `hmac_ready=True`, `allow_paid_api=False` | |
-| D.1.2 | HMAC PHP↔Python | Mesmo script → `test_hmac_compat_offline` 7/7 OK | |
+| D.1.2 | HMAC PHP↔Python | Mesmo script → `test_hmac_compat_offline` 10/10 OK | |
+| D.1.2b | Bootstrap admin offline | `php tests/owner_bootstrap_offline.php all` → 5× OK | |
 | D.1.3 | Seguranca worker offline | Mesmo script → `test_security_offline` 6/6 OK | |
 | D.1.4 | Modelo env servidor | No **Git local**, existe `config/env.production.example.php`; você montará **`private/clipia.env.php`** no servidor (não em `public_html`) | |
 
@@ -135,9 +136,10 @@ Escala sugerida: `OK` · `FALHA` · `N/A` · `PENDENTE`
 
 | Cenário | O que acontece | O que você confere |
 |---------|----------------|-------------------|
-| **`users` vazia** | No **primeiro login POST** bem-sucedido, `ensureOwnerAccountIfEmpty()` cria 1 linha com e-mail/hash do env | Env com `ADMIN_OWNER_*` correto; depois SQL `COUNT(*) >= 1` |
-| **`users` já tem linha** | Função **não** altera senhas nem cria duplicata | Login com e-mail existente; env admin ignorado |
-| **Produção** | `ADMIN_OWNER_PASSWORD` plain **não** deve ser usado (`app.php` default vazio) | Apenas **hash** bcrypt em `ADMIN_OWNER_PASSWORD_HASH` |
+| **`users` vazia + env admin** | `ensureOwnerAccountIfEmpty()` cria 1 linha com `ADMIN_OWNER_EMAIL` + hash | Hash bcrypt; login com essa senha |
+| **`users` vazia + bootstrap=1** | `bootstrapOwnerFromFirstLoginIfAllowed()` cria admin do formulário (1×) | Flag **0** após login OK |
+| **`users` já tem linha** | Nenhuma função altera senha automaticamente | Login com e-mail da tabela |
+| **Produção** | `ADMIN_OWNER_PASSWORD` em texto é **ignorado**; bootstrap padrão **desligado** | Ver `GUIA_PUBLICACAO_MANUAL.md` §5 |
 
 ### D.6 Site antes de testes “pesados”
 

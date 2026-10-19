@@ -25,7 +25,7 @@ O **ClipIA** é uma aplicação web desenvolvida em **PHP 8.2+**, **MySQL (PDO)*
 
 **Atenção — Auto Deploy:** o repositório contém `worker_service/` na raiz. Deploy Git para `public_html/clipia` **sem exclusões no hPanel** pode expor essa pasta na web. Use o **ZIP filtrado** ou confirme exclusões antes de confiar no Auto Deploy.
 
-**Publicação na Hostinger:** [`deploy/GUIA_PUBLICACAO_MANUAL.md`](deploy/GUIA_PUBLICACAO_MANUAL.md) (hPanel passo a passo) · [`deploy/PREPARACAO_PUBLICACAO.md`](deploy/PREPARACAO_PUBLICACAO.md) (sequência resumida).
+**Publicação na Hostinger:** [`deploy/INICIO_RAPIDO_HOSTINGER.md`](deploy/INICIO_RAPIDO_HOSTINGER.md) (mínimo manual) · [`deploy/GUIA_PUBLICACAO_MANUAL.md`](deploy/GUIA_PUBLICACAO_MANUAL.md) (completo) · [`deploy/PREPARACAO_PUBLICACAO.md`](deploy/PREPARACAO_PUBLICACAO.md).
 
 **Verificação local (Windows, offline):** na raiz do projeto, `.\deploy\verify-local.ps1` — sintaxe PHP, worker, HMAC, segurança e dependências **sem** chamar produção. Relatórios: [`deploy/RELATORIO_VERIFICACAO_LOCAL.md`](deploy/RELATORIO_VERIFICACAO_LOCAL.md) · [`deploy/SEGURANCA_REVISAO_LOCAL.md`](deploy/SEGURANCA_REVISAO_LOCAL.md). Worker: [`deploy/WORKER_WINDOWS.md`](deploy/WORKER_WINDOWS.md). Validação Hostinger: [`deploy/CHECKLIST_VALIDACAO_PRODUCAO.md`](deploy/CHECKLIST_VALIDACAO_PRODUCAO.md).
 

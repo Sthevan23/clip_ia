@@ -179,11 +179,36 @@ Opcionais no modelo: `CLIPIA_MAX_MONTHLY_COST_BRL` (100), `CLIPIA_MAX_COST_PER_J
 
 ---
 
-## Parte 5 — Administrador inicial
+## Parte 5 — Administrador inicial (login)
 
-- Se a tabela **`users` está vazia:** no **primeiro login POST** bem-sucedido, `UserRepository::ensureOwnerAccountIfEmpty()` cria o admin usando `ADMIN_OWNER_EMAIL` e `ADMIN_OWNER_PASSWORD_HASH` do env privado.
-- Se **`users` já tem registros:** o env admin **não** altera senhas existentes — use login com conta já cadastrada.
-- Em produção **não** use `ADMIN_OWNER_PASSWORD` em texto claro (`config/app.php` deixa default vazio em production).
+Com **`users` vazia**, escolha **uma** das formas (nunca as duas ao acaso):
+
+### Opção A — Env privado (recomendado em produção)
+
+1. No `private/clipia.env.php`, defina `ADMIN_OWNER_EMAIL` e **`ADMIN_OWNER_PASSWORD_HASH`** (bcrypt gerado no PC).
+2. **Não** use `ADMIN_OWNER_PASSWORD` em texto claro em produção (ignorado pelo código).
+3. Mantenha **`CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN`** ausente ou `'0'` (padrão).
+4. Abra `/login.php` e entre com esse e-mail e a senha que você usou para gerar o hash.
+
+### Opção B — Bootstrap temporário (primeiro acesso)
+
+1. Com `users` vazia, no env privado: `'CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN' => '1'`.
+2. Envie o **ZIP/PHP atualizado** (commit com `login.php` + `includes/repositories.php`).
+3. Faça **um** login com o e-mail e senha desejados (8–256 caracteres).
+4. Confirme o dashboard; o flash pedirá para **desligar** o bootstrap.
+5. Altere para `'CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN' => '0'` e salve o env.
+
+### Por que “Credenciais inválidas” com `users` vazia?
+
+| Causa | Correção |
+|-------|----------|
+| Bootstrap **desligado** e sem `ADMIN_OWNER_*` no env | Opção A ou B acima |
+| PHP **antigo** no servidor (sem bootstrap) | Reenviar ZIP filtrado |
+| Senha &lt; 8 caracteres com bootstrap ligado | Senha mais longa |
+| E-mail inválido (`FILTER_VALIDATE_EMAIL`) | Use domínio real (ex.: `@seudominio.com.br`) |
+
+- Se **`users` já tem linha:** bootstrap e env **não** recriam conta — use o e-mail existente ou ajuste hash no phpMyAdmin (procedimento manual).
+- Após a primeira conta, visitantes **não** podem criar admins (bootstrap só com tabela vazia + flag explícita).
 
 ---
 

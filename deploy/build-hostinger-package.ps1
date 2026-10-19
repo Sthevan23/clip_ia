@@ -1,8 +1,19 @@
-# Gera deploy/clipia-hostinger-public.zip — conteúdo para public_html na Hostinger
+# Gera artefato publico Hostinger (ZIP e/ou pasta espelho do ZIP aprovado).
+# Uso padrao:  .\deploy\build-hostinger-package.ps1
+# So pasta:    .\deploy\build-hostinger-package.ps1 -Output Directory
+# ZIP + pasta: .\deploy\build-hostinger-package.ps1 -Output Both
+param(
+    [ValidateSet('Zip', 'Directory', 'Both')]
+    [string]$Output = 'Zip'
+)
+
 $ErrorActionPreference = 'Stop'
 $ProjectRoot = Split-Path -Parent $PSScriptRoot
 $Staging = Join-Path $PSScriptRoot 'staging-hostinger'
 $ZipPath = Join-Path $PSScriptRoot 'clipia-hostinger-public.zip'
+$PublicDir = Join-Path $PSScriptRoot 'hostinger-public'
+$WriteZip = ($Output -eq 'Zip') -or ($Output -eq 'Both')
+$WriteDir = ($Output -eq 'Directory') -or ($Output -eq 'Both')
 
 if (Test-Path $Staging) {
     Remove-Item $Staging -Recurse -Force
@@ -93,9 +104,8 @@ PUBLICACAO — LEIA PRIMEIRO
 --------------------------
 - Este ZIP contem SOMENTE PHP, assets e pastas vazias de storage para public_html/clipia/.
 - NAO inclui: worker_service/, .env, segredos, videos, logs nem modelos env.example.
-- Auto Deploy da RAIZ do Git (sem exclusoes no hPanel) pode publicar worker_service/
-  dentro de public_html/clipia/ — risco de expor codigo Python. Prefira ESTE pacote
-  filtrado OU configure exclusoes comprovadas no painel Hostinger antes de usar Git Deploy.
+- Auto Deploy da branch main (raiz do repo) publica worker_service/, deploy/, samples, etc.
+  Use branch hostinger-public (somente esta arvore) — ver deploy/HOSTINGER_AUTO_DEPLOY.md.
 
 1) Extrair arquivos
    Extraia todo o conteudo em:
@@ -121,8 +131,9 @@ PUBLICACAO — LEIA PRIMEIRO
      DB_DRIVER=mysql, DB_HOST (geralmente 127.0.0.1 na Hostinger), DB_PORT, DB_NAME,
      DB_USER, DB_PASS, WORKER_SHARED_SECRET (minimo 16 caracteres),
      WORKER_REQUIRE_HTTPS=true.
-   - Se a tabela users estiver vazia: ADMIN_OWNER_EMAIL e ADMIN_OWNER_PASSWORD_HASH
-     (hash bcrypt; nao use senha em texto no env de producao).
+   - Se users estiver vazia: ADMIN_OWNER_EMAIL + ADMIN_OWNER_PASSWORD_HASH (recomendado),
+     OU temporariamente CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN=1 para criar admin no 1o login
+     (depois volte para 0). Bootstrap padrao no codigo: desligado.
 
 4) PHP no hPanel
    - Versao PHP 8.2 ou superior.
@@ -140,8 +151,9 @@ PUBLICACAO — LEIA PRIMEIRO
    - https://clipia.sthevandev.com.br/ nao deve mostrar "Configuracao do servidor incompleta".
    - /login.php deve exibir o formulario (sem erro de banco na tela).
 
-Documentacao completa (opcional, no repositorio Git):
-  deploy/GUIA_PUBLICACAO_MANUAL.md   (passo a passo hPanel - recomendado)
+Documentacao no PC (repositorio Git, nao vai no ZIP):
+  deploy/INICIO_RAPIDO_HOSTINGER.md  (minimo manual — comece aqui)
+  deploy/GUIA_PUBLICACAO_MANUAL.md   (passo a passo completo)
   deploy/PREPARACAO_PUBLICACAO.md
   deploy/CHECKLIST_VALIDACAO_PRODUCAO.md
   deploy/HOSTINGER.md
@@ -150,26 +162,50 @@ Documentacao completa (opcional, no repositorio Git):
 Apos extrair: confira arquivos proibidos (GUIA part. 2.3 ou PREPARACAO secao 3.2).
 "@ | Set-Content -Path (Join-Path $Staging 'LEIA-ME-HOSTINGER.txt') -Encoding UTF8
 
-if (Test-Path $ZipPath) { Remove-Item $ZipPath -Force }
-Compress-Archive -Path (Join-Path $Staging '*') -DestinationPath $ZipPath -CompressionLevel Optimal
+if ($WriteDir) {
+    if (Test-Path $PublicDir) {
+        Remove-Item $PublicDir -Recurse -Force
+    }
+    Copy-Item -Path $Staging -Destination $PublicDir -Recurse -Force
+}
+
+if ($WriteZip) {
+    if (Test-Path $ZipPath) { Remove-Item $ZipPath -Force }
+    Compress-Archive -Path (Join-Path $Staging '*') -DestinationPath $ZipPath -CompressionLevel Optimal
+}
 
 Remove-Item $Staging -Recurse -Force
 
 Write-Host ""
-Write-Host "OK: $ZipPath"
-Write-Host "Suba o conteudo extraido para public_html/clipia/ na Hostinger."
+if ($WriteZip) {
+    Write-Host "OK ZIP: $ZipPath"
+}
+if ($WriteDir) {
+    Write-Host "OK pasta publica: $PublicDir"
+}
+Write-Host "Destino servidor: public_html/clipia/"
 Write-Host "MySQL: importe config/schema.sql pelo phpMyAdmin."
 
 $inspectScript = Join-Path $PSScriptRoot 'inspect-hostinger-package.ps1'
 if (Test-Path -LiteralPath $inspectScript) {
     Write-Host ""
-    Write-Host "==> Validando composicao do ZIP..." -ForegroundColor Cyan
-    & $inspectScript
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "ERRO: inspecao do pacote falhou (exit $LASTEXITCODE)." -ForegroundColor Red
-        exit $LASTEXITCODE
+    if ($WriteZip) {
+        Write-Host "==> Validando composicao do ZIP..." -ForegroundColor Cyan
+        & $inspectScript
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "ERRO: inspecao do pacote falhou (exit $LASTEXITCODE)." -ForegroundColor Red
+            exit $LASTEXITCODE
+        }
+    }
+    if ($WriteDir) {
+        Write-Host "==> Validando pasta publica (espelho do ZIP)..." -ForegroundColor Cyan
+        & $inspectScript -DirectoryPath $PublicDir
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "ERRO: inspecao da pasta publica falhou (exit $LASTEXITCODE)." -ForegroundColor Red
+            exit $LASTEXITCODE
+        }
     }
 }
 else {
-    Write-Host "AVISO: inspect-hostinger-package.ps1 ausente; ZIP nao foi validado automaticamente." -ForegroundColor Yellow
+    Write-Host "AVISO: inspect-hostinger-package.ps1 ausente; artefato nao foi validado automaticamente." -ForegroundColor Yellow
 }

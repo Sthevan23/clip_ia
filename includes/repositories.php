@@ -175,125 +175,58 @@ class UserRepository
         return $newUserId;
     }
 
-    /**
-     * Garante a existência da conta administrativa do proprietário quando nenhuma conta existe no banco
-     * e as variáveis `ADMIN_OWNER_EMAIL` + (`ADMIN_OWNER_PASSWORD_HASH` ou `ADMIN_OWNER_PASSWORD`) estão definidas.
-     * Nunca sobrescreve usuários, projetos ou senhas existentes.
-     */
-    public static function ensureOwnerAccountIfEmpty(): void
+    public static function isOwnerPasswordAcceptable(string $password): bool
     {
-        $pdo = Database::getConnection();
-        if ($pdo === null) {
-            return;
-        }
-
-        try {
-            $count = (int)$pdo->query('SELECT COUNT(*) FROM users')->fetchColumn();
-            if ($count > 0) {
-                return;
-            }
-
-            $ownerEmail = mb_strtolower(trim((string)ADMIN_OWNER_EMAIL));
-            $ownerName  = trim((string)ADMIN_OWNER_NAME) ?: 'Administrador ClipIA';
-            $ownerHash  = trim((string)ADMIN_OWNER_PASSWORD_HASH);
-            $ownerPlain = (string)ADMIN_OWNER_PASSWORD;
-
-            if ($ownerEmail === '' || !filter_var($ownerEmail, FILTER_VALIDATE_EMAIL)) {
-                return;
-            }
-
-            if ($ownerHash === '' && $ownerPlain !== '') {
-                $ownerHash = password_hash($ownerPlain, PASSWORD_DEFAULT);
-            }
-
-            if ($ownerHash === '') {
-                return;
-            }
-
-            $now = date('Y-m-d H:i:s');
-            $stmt = $pdo->prepare(
-                'INSERT INTO users (
-                    name, email, password_hash, plan_tier,
-                    default_aspect_ratio, default_clips_count,
-                    default_min_duration, default_max_duration,
-                    email_notifications, accepted_terms_at, created_at, updated_at
-                ) VALUES (
-                    :name, :email, :password_hash, :plan_tier,
-                    :default_aspect_ratio, :default_clips_count,
-                    :default_min_duration, :default_max_duration,
-                    :email_notifications, :accepted_terms_at, :created_at, :updated_at
-                )'
-            );
-            $stmt->execute([
-                ':name'                 => $ownerName,
-                ':email'                => $ownerEmail,
-                ':password_hash'        => $ownerHash,
-                ':plan_tier'            => 'owner',
-                ':default_aspect_ratio' => CLIP_DEFAULT_FORMAT,
-                ':default_clips_count'  => CLIP_DEFAULT_COUNT,
-                ':default_min_duration' => CLIP_DEFAULT_MIN_DURATION,
-                ':default_max_duration' => CLIP_DEFAULT_MAX_DURATION,
-                ':email_notifications'  => 1,
-                ':accepted_terms_at'    => $now,
-                ':created_at'           => $now,
-                ':updated_at'           => $now,
-            ]);
-        } catch (Throwable $e) {
-            error_log('[ClipIA ensureOwnerAccountIfEmpty] ' . $e->getMessage());
-        }
+        $len = strlen($password);
+        return $len >= 8 && $len <= 256;
     }
 
     /**
-     * Cria o proprietário a partir do formulário de login quando a tabela users está vazia
-     * e CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN está ativo (padrão: sim em dev, não em produção).
+     * Insere o proprietário inicial somente se users estiver vazio (transação + verificação dupla).
+     *
+     * @return bool true se inseriu exatamente uma linha nesta chamada
      */
-    public static function bootstrapOwnerFromFirstLoginIfAllowed(string $email, string $password): void
-    {
-        if (!defined('CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN') || !CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN) {
-            return;
-        }
-
+    private static function insertOwnerUserIfTableEmpty(
+        string $ownerEmail,
+        string $passwordHash,
+        string $ownerName
+    ): bool {
         $pdo = Database::getConnection();
         if ($pdo === null) {
-            return;
+            return false;
         }
 
-        $normalizedEmail = mb_strtolower(trim($email));
+        $normalizedEmail = mb_strtolower(trim($ownerEmail));
         if ($normalizedEmail === '' || !filter_var($normalizedEmail, FILTER_VALIDATE_EMAIL)) {
-            return;
+            return false;
         }
 
-        if (strlen($password) < 8) {
-            return;
+        if ($passwordHash === '' || !str_starts_with($passwordHash, '$')) {
+            return false;
         }
+
+        $ownerName = trim($ownerName) !== '' ? trim($ownerName) : 'Administrador ClipIA';
 
         try {
-            $count = (int)$pdo->query('SELECT COUNT(*) FROM users')->fetchColumn();
-            if ($count > 0) {
-                return;
-            }
-
-            $ownerName = trim((string)ADMIN_OWNER_NAME) ?: 'Administrador ClipIA';
-            $ownerHash = password_hash($password, PASSWORD_DEFAULT);
             $now = date('Y-m-d H:i:s');
-
             $stmt = $pdo->prepare(
                 'INSERT INTO users (
                     name, email, password_hash, plan_tier,
                     default_aspect_ratio, default_clips_count,
                     default_min_duration, default_max_duration,
                     email_notifications, accepted_terms_at, created_at, updated_at
-                ) VALUES (
+                )
+                SELECT
                     :name, :email, :password_hash, :plan_tier,
                     :default_aspect_ratio, :default_clips_count,
                     :default_min_duration, :default_max_duration,
                     :email_notifications, :accepted_terms_at, :created_at, :updated_at
-                )'
+                WHERE (SELECT COUNT(*) FROM users) = 0'
             );
             $stmt->execute([
                 ':name'                 => $ownerName,
                 ':email'                => $normalizedEmail,
-                ':password_hash'        => $ownerHash,
+                ':password_hash'        => $passwordHash,
                 ':plan_tier'            => 'owner',
                 ':default_aspect_ratio' => CLIP_DEFAULT_FORMAT,
                 ':default_clips_count'  => CLIP_DEFAULT_COUNT,
@@ -304,8 +237,85 @@ class UserRepository
                 ':created_at'           => $now,
                 ':updated_at'           => $now,
             ]);
+
+            return $stmt->rowCount() === 1;
         } catch (Throwable $e) {
-            error_log('[ClipIA bootstrapOwnerFromFirstLogin] ' . $e->getMessage());
+            error_log('[ClipIA insertOwnerUserIfTableEmpty] ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Garante a conta admin via env quando users está vazia (ADMIN_OWNER_EMAIL + hash).
+     * Em produção não aceita ADMIN_OWNER_PASSWORD em texto — use ADMIN_OWNER_PASSWORD_HASH.
+     */
+    public static function ensureOwnerAccountIfEmpty(): void
+    {
+        $ownerEmail = mb_strtolower(trim((string)ADMIN_OWNER_EMAIL));
+        $ownerName  = trim((string)ADMIN_OWNER_NAME) ?: 'Administrador ClipIA';
+        $ownerHash  = trim((string)ADMIN_OWNER_PASSWORD_HASH);
+        $ownerPlain = (string)ADMIN_OWNER_PASSWORD;
+
+        if ($ownerEmail === '' || !filter_var($ownerEmail, FILTER_VALIDATE_EMAIL)) {
+            return;
+        }
+
+        if ($ownerHash === '' && $ownerPlain !== '') {
+            if (defined('APP_ENV') && APP_ENV === 'production') {
+                error_log('[ClipIA ensureOwnerAccountIfEmpty] ADMIN_OWNER_PASSWORD em texto ignorado em producao; use ADMIN_OWNER_PASSWORD_HASH.');
+                return;
+            }
+            if (!self::isOwnerPasswordAcceptable($ownerPlain)) {
+                return;
+            }
+            $ownerHash = password_hash($ownerPlain, PASSWORD_DEFAULT);
+        }
+
+        if ($ownerHash === '') {
+            return;
+        }
+
+        self::insertOwnerUserIfTableEmpty($ownerEmail, $ownerHash, $ownerName);
+    }
+
+    /**
+     * Cria o proprietário a partir do login quando CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN=1 e users vazia.
+     *
+     * @return bool true se criou o usuário nesta requisição
+     */
+    public static function bootstrapOwnerFromFirstLoginIfAllowed(string $email, string $password): bool
+    {
+        if (!defined('CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN') || !CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN) {
+            return false;
+        }
+
+        $normalizedEmail = mb_strtolower(trim($email));
+        if ($normalizedEmail === '' || !filter_var($normalizedEmail, FILTER_VALIDATE_EMAIL)) {
+            return false;
+        }
+
+        if (!self::isOwnerPasswordAcceptable($password)) {
+            return false;
+        }
+
+        $ownerName = trim((string)ADMIN_OWNER_NAME) ?: 'Administrador ClipIA';
+        $ownerHash = password_hash($password, PASSWORD_DEFAULT);
+
+        return self::insertOwnerUserIfTableEmpty($normalizedEmail, $ownerHash, $ownerName);
+    }
+
+    public static function countUsers(): int
+    {
+        $pdo = Database::getConnection();
+        if ($pdo === null) {
+            return -1;
+        }
+
+        try {
+            return (int)$pdo->query('SELECT COUNT(*) FROM users')->fetchColumn();
+        } catch (Throwable $e) {
+            error_log('[ClipIA countUsers] ' . $e->getMessage());
+            return -1;
         }
     }
 

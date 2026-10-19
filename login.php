@@ -24,20 +24,31 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
         set_flash('error', 'Banco de dados indisponível', Database::getPublicErrorMessage());
     } else {
         UserRepository::ensureOwnerAccountIfEmpty();
-        UserRepository::bootstrapOwnerFromFirstLoginIfAllowed($email, $password);
+        $bootstrappedNow = UserRepository::bootstrapOwnerFromFirstLoginIfAllowed($email, $password);
         $user = UserRepository::findByEmail($email);
 
         // Mensagem genérica unificada para não expor se o e-mail existe ou não (Prevenção contra enumeração de usuários)
         if ($user === null || !password_verify($password, (string)$user['password_hash'])) {
+            if (
+                UserRepository::countUsers() === 0
+                && (!defined('CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN') || !CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN)
+            ) {
+                error_log('[ClipIA login] Nenhum usuario no banco e bootstrap desativado (defina ADMIN_OWNER_* ou CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN=1 temporariamente).');
+            }
             set_flash('error', 'Credenciais inválidas', 'E-mail ou senha incorretos. Verifique os dados informados e tente novamente.');
         } else {
             login_user_session($user);
             UsageLogRepository::log((int)$user['id'], 'user_login', 'Login realizado com sucesso.');
 
+            $welcomeBody = 'Seu acesso foi autenticado com segurança.';
+            if ($bootstrappedNow) {
+                $welcomeBody .= ' Conta administrativa criada. Desative CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN no env privado assim que confirmar o acesso.';
+            }
+
             set_flash(
                 'success',
                 'Bem-vindo de volta, ' . $user['name'] . '!',
-                'Seu acesso foi autenticado com segurança.'
+                $welcomeBody
             );
             header('Location: dashboard.php');
             exit;
@@ -65,11 +76,11 @@ require_once __DIR__ . '/includes/header.php';
         <div class="auth-header">
             <h1 id="login-title" class="auth-title">Acesso Administrativo</h1>
             <p class="auth-subtitle">
-                Uso exclusivo do proprietário. Entre com o e-mail e a senha que deseja usar.
+                Uso exclusivo do proprietário.
                 <?php if (defined('CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN') && CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN): ?>
-                    Se ainda não houver conta no banco, o <strong>primeiro login</strong> cria o administrador com esses dados (senha mín. 8 caracteres).
+                    Com o banco sem usuários, este login pode <strong>criar</strong> a conta administrativa (senha 8–256 caracteres). Desative o bootstrap no env privado após entrar.
                 <?php else: ?>
-                    Configure <code>ADMIN_OWNER_*</code> no env privado ou defina <code>CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN=1</code> só para testes.
+                    Use as credenciais definidas no env privado (<code>ADMIN_OWNER_*</code>) ou habilite temporariamente <code>CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN=1</code> para o primeiro acesso.
                 <?php endif; ?>
             </p>
         </div>

@@ -133,10 +133,7 @@ if (!defined('APP_NAME')) {
     define('ADMIN_OWNER_PASSWORD', clipia_env('ADMIN_OWNER_PASSWORD', ''));
     define(
         'CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN',
-        clipia_env(
-            'CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN',
-            APP_ENV === 'production' ? '0' : '1'
-        ) === '1'
+        clipia_env('CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN', '0') === '1'
     );
 
     clipia_abort_if_production_misconfigured();

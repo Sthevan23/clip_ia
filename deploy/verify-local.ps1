@@ -68,7 +68,7 @@ $domainRootDir = dirname($parentOfPublicRoot);
 echo 'domainRootDir=' . $domainRootDir . PHP_EOL;
 echo 'private_env_path=' . $domainRootDir . '/private/clipia.env.php' . PHP_EOL;
 '@
-        $utf8NoBom = New-Object System.Text.UTF8Encoding $false
+        $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
         [System.IO.File]::WriteAllText($tempPhp, $phpBody, $utf8NoBom)
         if (-not (Test-Path -LiteralPath $tempPhp)) {
             Write-Host 'AVISO: script temporario nao criado; simulacao de caminho ignorada.' -ForegroundColor Yellow
@@ -126,6 +126,18 @@ function Invoke-WorkerChecks {
         # unittest no Windows escreve resumo em stderr; cmd /c evita ErrorRecord falso no PS 5.1
         $hmacCmd = 'cd /d "' + $WorkerDir + '" && "' + $PythonExe + '" test_hmac_compat_offline.py 2>&1'
         cmd /c $hmacCmd | ForEach-Object { Write-Host $_ }
+        if ($LASTEXITCODE -ne 0) {
+            Set-StepFailed
+        }
+    }
+    finally {
+        Pop-Location -ErrorAction SilentlyContinue
+    }
+
+    Write-Step 'PHP - owner bootstrap offline (tests/owner_bootstrap_offline.php)'
+    Push-Location $ProjectRoot
+    try {
+        Write-NativeOutput (& php tests\owner_bootstrap_offline.php all 2>&1)
         if ($LASTEXITCODE -ne 0) {
             Set-StepFailed
         }

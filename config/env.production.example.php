@@ -46,6 +46,7 @@ return [
     'ADMIN_OWNER_NAME'                 => 'Administrador ClipIA',
     'ADMIN_OWNER_EMAIL'                => 'admin@exemplo.seudominio.com.br',
     'ADMIN_OWNER_PASSWORD_HASH'        => '',
+    // 'CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN' => '0', // '1' só para criar o 1º admin via login; desligue depois
 
     // --- Opcional (worker / orçamento futuro) ---
     'WORKER_JOB_STALE_TIMEOUT_SECONDS' => '1800',

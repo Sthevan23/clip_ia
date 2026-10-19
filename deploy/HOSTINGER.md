@@ -25,7 +25,7 @@ O repositório inclui **`worker_service/`** (worker Python, testes, `main.py`). 
 **Recomendado para produção:**
 
 1. **`.\deploy\build-hostinger-package.ps1`** → subir **`deploy/clipia-hostinger-public.zip`** (FTP/Gerenciador) — contém só PHP/assets; o **`LEIA-ME-HOSTINGER.txt`** dentro do ZIP traz os passos essenciais.
-2. **Ou** Auto Deploy **somente** se no hPanel existirem **exclusões comprovadas** (ex.: não publicar `worker_service/`, `deploy/*.zip`, mídia em `storage/`, scripts em `storage/`). Após cada deploy, confirme no Gerenciador que **não** existe `public_html/clipia/worker_service/`.
+2. **Ou** Auto Deploy via branch **`hostinger-public`** (só arquivos do pacote filtrado) — ver **[`HOSTINGER_AUTO_DEPLOY.md`](HOSTINGER_AUTO_DEPLOY.md)**. A documentação oficial do GitHub App **não** descreve exclusões de pastas; não confie em `main` → `public_html/clipia` sem validar no hPanel.
 
 ### Se usar Auto Deploy (Git)
 

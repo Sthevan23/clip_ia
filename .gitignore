@@ -44,6 +44,8 @@ __pycache__/
 
 # Pacote gerado para Hostinger (deploy/build-hostinger-package.ps1)
 /deploy/staging-hostinger/
+/deploy/hostinger-public/
+/deploy/hostinger-public-FILELIST.txt
 /deploy/*.zip
 
 # Artefato acidental de terminal (nao versionar; arquivo pode permanecer no disco)

@@ -476,3 +476,92 @@ Conferido localmente (`inspect-hostinger-package.ps1`, **47 entradas**, proibido
 | Env privado com segredo **exclusivo** (não dev/exemplo) | **Pendente** (você, no hPanel) |
 
 **Conclusão:** o projeto está **pronto para iniciar o upload manual** do ZIP filtrado e a configuração privada no servidor, desde que você use um `WORKER_SHARED_SECRET` gerado localmente (fora da blocklist). A **auditoria de segurança do repositório não está fechada** até rodar Gitleaks (§13.2). **Produção não validada.**
+
+---
+
+## 15. Auditoria login/bootstrap e preparação produção (~22:46 UTC-3)
+
+### 15.1 Diagnóstico — por que login falhou com `users` vazia
+
+| Causa provável (código + contexto informado) | Explicação |
+|-----------------------------------------------|------------|
+| Bootstrap **desligado por padrão** | `CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN` default **`0`**; sem `ADMIN_OWNER_*` no env nenhuma conta é criada → `password_verify` falha → mensagem genérica |
+| PHP **desatualizado** no servidor | Git push ≠ substituir `public_html/clipia/`; ZIP antigo sem bootstrap |
+| Env privado **não confirmado** | Sem `private/clipia.env.php` carregado, 503 ou MySQL/HMAC incompletos |
+| E-mail inválido para `FILTER_VALIDATE_EMAIL` | Domínios `.local` rejeitados no formulário |
+
+### 15.2 Correções implementadas (local)
+
+- Bootstrap **só** com flag explícita `CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN=1` (padrão **0** em todos os ambientes).
+- Inserção atômica `INSERT … SELECT … WHERE (SELECT COUNT(*) FROM users) = 0` (concorrência + sem recriar conta).
+- Produção: `ADMIN_OWNER_PASSWORD` em texto **ignorado**; use hash.
+- Flash pós-bootstrap orienta desligar a flag.
+- Log genérico quando `users` vazia e bootstrap off (sem segredos).
+- Testes: `tests/owner_bootstrap_offline.php` (5 casos) + `worker_service/test_owner_bootstrap_offline.py`.
+
+### 15.3 Testes executados (resultados reais)
+
+| Comando | Resultado |
+|---------|-----------|
+| `php tests/owner_bootstrap_offline.php all` | **exit 0** — 5× OK |
+| `python -m unittest discover -s worker_service -p "test_*.py" -q` | **33 OK** |
+| `.\deploy\verify-local.ps1` | **exit 0** (HMAC 10/10, security 6/6, bootstrap PHP) |
+| `.\deploy\build-hostinger-package.ps1` | **47 entradas**, proibidos OK |
+
+### 15.4 ZIP
+
+`deploy/clipia-hostinger-public.zip` regenerado com `login.php`, `includes/repositories.php`, `config/app.php` atualizados.
+
+### 15.5 Pendências Hostinger (não verificadas pelo agente)
+
+Upload ZIP, env privado, MySQL, login real, Gitleaks histórico, `.htaccess` no LiteSpeed, smoke worker.
+
+**Produção não validada.**
+
+---
+
+## 16. Tarefa final — publicação Hostinger (~23:00 UTC-3, 2026-10-18)
+
+### 16.1 Estado Git vs ZIP
+
+| Item | Situação |
+|------|----------|
+| Último commit remoto | `24a5fd9` |
+| Alterações locais pós-commit | login/bootstrap, testes, guias (**não commitadas**) |
+| ZIP alinhado ao disco | **Sim** — `insertOwnerUserIfTableEmpty` no ZIP |
+| GitHub = site publicado | **Não** — preferir ZIP filtrado |
+
+### 16.2 Testes (esta execução)
+
+| Comando | Resultado |
+|---------|-----------|
+| `python -m unittest discover -s worker_service -p "test_*.py" -q` | **33 OK** |
+| `python test_integration.py` | **OK** [OK] 1–13 |
+| `php tests/owner_bootstrap_offline.php all` | **5× OK** |
+| `deploy/verify-local.ps1` | **exit 0** |
+| `deploy/build-hostinger-package.ps1` | **47 entradas**, proibidos OK |
+
+### 16.3 Segredos
+
+Gitleaks: **ausente**. ZIP: inspeção **OK**. Credenciais reais: **fora do Git/ZIP**.
+
+### 16.4 Hostinger
+
+**Sem acesso** — publicação **não** executada.
+
+### 16.5 Matriz funcional
+
+| Funcionalidade | Estado | Evidência |
+|----------------|--------|-----------|
+| Login / CSRF / sessão | Aprovado localmente | integration 11; bootstrap 5/5 |
+| Admin A (hash env) | Aprovado localmente | `ensure_owner_from_env_hash` |
+| Admin B (bootstrap) | Aprovado localmente; default off | `bootstrap_*` tests |
+| Projetos / upload / jobs / HMAC / orçamento | Aprovado localmente | integration [OK] 1–13 |
+| Worker clipes (local) | Aprovado localmente | [OK] 4–5 |
+| MySQL produção | Pendente produção | schema 8 tabelas no ZIP |
+| Login clipia.sthevandev.com.br | Pendente produção | — |
+| Worker HTTPS produção | Pendente produção | — |
+| Gitleaks histórico | Não verificado | — |
+| `.htaccess` LiteSpeed | Não verificado | — |
+
+**Pacote:** `deploy/clipia-hostinger-public.zip` · **Guia:** `deploy/INICIO_RAPIDO_HOSTINGER.md`

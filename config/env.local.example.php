@@ -14,7 +14,7 @@ return [
     // 'ADMIN_OWNER_EMAIL' => 'voce@exemplo.local',
     // 'ADMIN_OWNER_PASSWORD' => 'SuaSenhaDeTeste123',
 
-    // Padrão em development: 1 = primeiro login cria o admin (tabela users vazia)
+    // Somente com '1': primeiro login cria o admin se users estiver vazia (desligue depois)
     'CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN' => '1',
 
     'DB_DRIVER' => 'sqlite',

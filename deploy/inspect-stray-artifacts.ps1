@@ -18,7 +18,7 @@ function Inspect-StrayFile {
     $stream = $null
     try {
         $stream = [System.IO.File]::OpenRead($FileInfo.FullName)
-        $buf = New-Object byte[] 512
+        $buf = [byte[]]::new(512)
         $read = $stream.Read($buf, 0, $buf.Length)
         if ($read -le 0) {
             Write-Host 'content_class=empty'
