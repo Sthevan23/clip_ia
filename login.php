@@ -24,6 +24,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
         set_flash('error', 'Banco de dados indisponível', Database::getPublicErrorMessage());
     } else {
         UserRepository::ensureOwnerAccountIfEmpty();
+        UserRepository::bootstrapOwnerFromFirstLoginIfAllowed($email, $password);
         $user = UserRepository::findByEmail($email);
 
         // Mensagem genérica unificada para não expor se o e-mail existe ou não (Prevenção contra enumeração de usuários)
@@ -63,7 +64,14 @@ require_once __DIR__ . '/includes/header.php';
     <section class="auth-card" aria-labelledby="login-title">
         <div class="auth-header">
             <h1 id="login-title" class="auth-title">Acesso Administrativo</h1>
-            <p class="auth-subtitle">Uso exclusivo do proprietário. Entre com suas credenciais administrativas.</p>
+            <p class="auth-subtitle">
+                Uso exclusivo do proprietário. Entre com o e-mail e a senha que deseja usar.
+                <?php if (defined('CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN') && CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN): ?>
+                    Se ainda não houver conta no banco, o <strong>primeiro login</strong> cria o administrador com esses dados (senha mín. 8 caracteres).
+                <?php else: ?>
+                    Configure <code>ADMIN_OWNER_*</code> no env privado ou defina <code>CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN=1</code> só para testes.
+                <?php endif; ?>
+            </p>
         </div>
 
         <?php render_flash_container(); ?>

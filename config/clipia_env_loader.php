@@ -111,6 +111,38 @@ function clipia_private_env_loaded(): bool
 }
 
 /**
+ * Segredos de exemplo/desenvolvimento que não podem ser usados em produção (fail-closed).
+ * Não registra nem expõe o valor comparado.
+ */
+function clipia_is_disallowed_worker_secret_for_production(string $secret): bool
+{
+    $normalized = trim($secret);
+    if ($normalized === '') {
+        return false;
+    }
+
+    static $exactBlocklist = null;
+    if ($exactBlocklist === null) {
+        $exactBlocklist = [
+            'clipia-dev-hmac-secret-key-change-in-production-2026',
+            'SUBSTITUA_POR_SEGREDO_HMAC_GERADO_LOCALMENTE',
+            'SEGREDO_HMAC_64_CARACTERES_ALEATORIOS',
+            'ALTERE_PARA_UM_SEGREDO_HMAC_DE_PELO_MENOS_32_BYTES',
+        ];
+    }
+
+    if (in_array($normalized, $exactBlocklist, true)) {
+        return true;
+    }
+
+    if (preg_match('/^(SUBSTITUA|ALTERE)_/i', $normalized) === 1) {
+        return true;
+    }
+
+    return false;
+}
+
+/**
  * Problemas de configuração (mensagens genéricas, sem segredos).
  *
  * @return list<string>
@@ -133,6 +165,8 @@ function clipia_collect_production_config_issues(): array
 
     if (strlen((string)WORKER_SHARED_SECRET) < 16) {
         $issues[] = 'WORKER_SHARED_SECRET ausente ou curto (mínimo 16 caracteres).';
+    } elseif (clipia_is_disallowed_worker_secret_for_production((string)WORKER_SHARED_SECRET)) {
+        $issues[] = 'WORKER_SHARED_SECRET usa valor de exemplo ou de desenvolvimento; gere um segredo exclusivo para produção.';
     }
 
     if (clipia_env('APP_URL', '') === '') {

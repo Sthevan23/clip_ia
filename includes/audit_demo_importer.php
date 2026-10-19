@@ -4,6 +4,10 @@ declare(strict_types=1);
 /**
  * Importação idempotente do resultado real do worker (`storage/audit_real_free_run.json`)
  * para exibição no painel web, sem reprocessar vídeo e sem duplicar candidatos.
+ *
+ * Obrigatório em produção: `projects.php` faz require deste arquivo (fatal se ausente).
+ * A ação "import_audit_demo" só aparece/funciona se o JSON existir no servidor; o pacote
+ * Hostinger não envia esse JSON nem clipes de audit — uso normal do site não depende dele.
  */
 
 require_once __DIR__ . '/repositories.php';

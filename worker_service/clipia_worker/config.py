@@ -9,8 +9,31 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Literal
+from urllib.parse import urlparse
 
 from dotenv import dotenv_values, load_dotenv
+
+_DEV_HMAC_FALLBACK = "clipia-dev-hmac-secret-key-change-in-production-2026"
+
+_DISALLOWED_REMOTE_WORKER_SECRETS = frozenset(
+    {
+        _DEV_HMAC_FALLBACK,
+        "SUBSTITUA_POR_SEGREDO_HMAC_GERADO_LOCALMENTE",
+        "SEGREDO_HMAC_64_CARACTERES_ALEATORIOS",
+        "ALTERE_PARA_UM_SEGREDO_HMAC_DE_PELO_MENOS_32_BYTES",
+    }
+)
+
+
+def _is_disallowed_worker_secret_for_remote_backend(secret: str) -> bool:
+    cleaned = secret.strip()
+    if not cleaned:
+        return False
+    if cleaned in _DISALLOWED_REMOTE_WORKER_SECRETS:
+        return True
+    lowered = cleaned.lower()
+    return lowered.startswith("substitua_") or lowered.startswith("altere_")
+
 
 _PLACEHOLDER_API_KEYS = {
     "",
@@ -48,6 +71,33 @@ def _read_windows_registry_env_var(name: str) -> str:
                 continue
     except Exception:
         return ""
+    return ""
+
+
+def _is_local_backend_url(backend_api_url: str) -> bool:
+    host = (urlparse(backend_api_url.strip()).hostname or "").lower()
+    return host in ("127.0.0.1", "localhost", "::1")
+
+
+def _resolve_worker_shared_secret(backend_api_url: str) -> str:
+    """
+    Segredo HMAC do worker. Valor vazio no .env (CLIPIA_WORKER_SHARED_SECRET=) nao usa fallback
+    de desenvolvimento quando o backend e remoto (HTTPS/producao). Fallback local apenas para
+    localhost/127.0.0.1.
+    """
+    if "CLIPIA_WORKER_SHARED_SECRET" in os.environ:
+        raw = (os.environ.get("CLIPIA_WORKER_SHARED_SECRET") or "").strip()
+    else:
+        raw = (os.getenv("CLIPIA_WORKER_SHARED_SECRET") or "").strip()
+
+    if len(raw) >= 16:
+        if not _is_local_backend_url(backend_api_url) and _is_disallowed_worker_secret_for_remote_backend(raw):
+            return ""
+        return raw
+    if raw != "":
+        return raw
+    if _is_local_backend_url(backend_api_url):
+        return _DEV_HMAC_FALLBACK
     return ""
 
 
@@ -188,15 +238,14 @@ class WorkerConfig:
         if not _is_valid_non_placeholder_key(raw_openai_key):
             raw_openai_key = ""
 
+        backend_api_url = os.getenv(
+            "CLIPIA_BACKEND_API_URL",
+            "http://127.0.0.1:8099/pages/worker-api.php",
+        ).strip()
+
         return cls(
-            backend_api_url=os.getenv(
-                "CLIPIA_BACKEND_API_URL",
-                "http://127.0.0.1:8099/pages/worker-api.php",
-            ).strip(),
-            worker_shared_secret=os.getenv(
-                "CLIPIA_WORKER_SHARED_SECRET",
-                "clipia-dev-hmac-secret-key-change-in-production-2026",
-            ).strip(),
+            backend_api_url=backend_api_url,
+            worker_shared_secret=_resolve_worker_shared_secret(backend_api_url),
             verify_tls=_env_bool("CLIPIA_VERIFY_TLS", True),
             whisper_model=os.getenv("CLIPIA_WHISPER_MODEL", "base").strip(),
             whisper_device=device,

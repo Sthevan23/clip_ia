@@ -128,9 +128,16 @@ if (!defined('APP_NAME')) {
     // Modo exclusivo de proprietário único (sem cadastro público aberto)
     define('PUBLIC_REGISTRATION_ENABLED', false);
     define('ADMIN_OWNER_NAME', clipia_env('ADMIN_OWNER_NAME', 'Administrador ClipIA'));
-    define('ADMIN_OWNER_EMAIL', clipia_env('ADMIN_OWNER_EMAIL', APP_ENV === 'production' ? '' : 'admin@clipia.local'));
+    define('ADMIN_OWNER_EMAIL', clipia_env('ADMIN_OWNER_EMAIL', ''));
     define('ADMIN_OWNER_PASSWORD_HASH', clipia_env('ADMIN_OWNER_PASSWORD_HASH', ''));
-    define('ADMIN_OWNER_PASSWORD', clipia_env('ADMIN_OWNER_PASSWORD', APP_ENV === 'production' ? '' : 'AdminClipIA123!'));
+    define('ADMIN_OWNER_PASSWORD', clipia_env('ADMIN_OWNER_PASSWORD', ''));
+    define(
+        'CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN',
+        clipia_env(
+            'CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN',
+            APP_ENV === 'production' ? '0' : '1'
+        ) === '1'
+    );
 
     clipia_abort_if_production_misconfigured();
 }

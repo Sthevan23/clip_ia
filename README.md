@@ -21,11 +21,29 @@ O **ClipIA** é uma aplicação web desenvolvida em **PHP 8.2+**, **MySQL (PDO)*
 
 ## 2. Checklist de Publicação na Hostinger Business
 
-**Pacote pronto para FTP:** na raiz do projeto execute `.\deploy\build-hostinger-package.ps1` — gera `deploy/clipia-hostinger-public.zip` (só PHP para `public_html/`). Detalhes em [`deploy/HOSTINGER.md`](deploy/HOSTINGER.md).
+**Pacote pronto para FTP (recomendado):** na raiz do projeto execute `.\deploy\build-hostinger-package.ps1` — gera `deploy/clipia-hostinger-public.zip` (só PHP/assets para `public_html/clipia/`; **`LEIA-ME-HOSTINGER.txt`** autocontido). Detalhes em [`deploy/HOSTINGER.md`](deploy/HOSTINGER.md).
 
-### 2.1. Variáveis do Backend PHP (`/home/uXXXXXXXXX/clipia_secrets/env.production.php`)
+**Atenção — Auto Deploy:** o repositório contém `worker_service/` na raiz. Deploy Git para `public_html/clipia` **sem exclusões no hPanel** pode expor essa pasta na web. Use o **ZIP filtrado** ou confirme exclusões antes de confiar no Auto Deploy.
 
-Crie a pasta `/home/uXXXXXXXXX/clipia_secrets` **fora de `public_html`** (permissão `0700`) e o arquivo `env.production.php` (permissão `0600`):
+**Publicação na Hostinger:** [`deploy/GUIA_PUBLICACAO_MANUAL.md`](deploy/GUIA_PUBLICACAO_MANUAL.md) (hPanel passo a passo) · [`deploy/PREPARACAO_PUBLICACAO.md`](deploy/PREPARACAO_PUBLICACAO.md) (sequência resumida).
+
+**Verificação local (Windows, offline):** na raiz do projeto, `.\deploy\verify-local.ps1` — sintaxe PHP, worker, HMAC, segurança e dependências **sem** chamar produção. Relatórios: [`deploy/RELATORIO_VERIFICACAO_LOCAL.md`](deploy/RELATORIO_VERIFICACAO_LOCAL.md) · [`deploy/SEGURANCA_REVISAO_LOCAL.md`](deploy/SEGURANCA_REVISAO_LOCAL.md). Worker: [`deploy/WORKER_WINDOWS.md`](deploy/WORKER_WINDOWS.md). Validação Hostinger: [`deploy/CHECKLIST_VALIDACAO_PRODUCAO.md`](deploy/CHECKLIST_VALIDACAO_PRODUCAO.md).
+
+### 2.1. Configuração privada PHP na Hostinger (`private/clipia.env.php`)
+
+Com o app em `public_html/clipia/`, o PHP carrega credenciais **somente fora da web** a partir de:
+
+**`/home/u586160337/domains/sthevandev.com.br/private/clipia.env.php`**
+
+(Pasta `private` irmã de `public_html`, permissão **700**; arquivo `clipia.env.php` com permissão **600**.) O loader está em `config/clipia_env_loader.php`. Modelo para copiar ao servidor: `config/env.production.example.php` (**não** commite segredos reais).
+
+Guia passo a passo: [`deploy/HOSTINGER.md`](deploy/HOSTINGER.md).
+
+<details>
+<summary>Nota histórica — caminhos legados no loader</summary>
+
+Versões antigas da documentação citavam `~/clipia_secrets/env.production.php`. O `clipia_env_loader.php` ainda tenta arquivos legados **se existirem no servidor**, mas a configuração oficial deste projeto é **`private/clipia.env.php`** no caminho absoluto acima.
+</details>
 
 ```php
 <?php
@@ -117,6 +135,6 @@ CLIPIA_BUDGET_LEDGER_PATH=../storage/budget_ledger.json
    - Em **hPanel → Bancos de Dados → Gerenciamento**, crie o banco de dados e o usuário MySQL.
    - No **phpMyAdmin**, importe `config/schema.sql`.
 4. **Arquivos e Credenciais Fora da Pasta Pública**:
-   - Envie os arquivos da aplicação PHP para `public_html/` (sem enviar `worker_service/`).
-   - Crie `/home/uXXXXXXXXX/clipia_secrets/env.production.php` fora de `public_html/` com as credenciais reais e o hash da senha administrativa do proprietário.
-   - Verifique se `public_html/storage/uploads` e `public_html/storage/logs` possuem permissão `750` (ou `755`).
+   - Envie os arquivos da aplicação PHP para `public_html/clipia/` (sem enviar `worker_service/`).
+   - Crie `domains/SEU_DOMINIO/private/clipia.env.php` com MySQL, `WORKER_SHARED_SECRET`, `APP_URL` e admin (`ADMIN_OWNER_*` se a tabela `users` estiver vazia).
+   - Verifique se `public_html/clipia/storage/uploads` e `storage/logs` possuem permissão `750` (ou `755`).

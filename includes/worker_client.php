@@ -116,6 +116,14 @@ class ExternalWorkerClient implements ProcessingServiceInterface
             ];
         }
 
+        if (defined('APP_ENV') && APP_ENV === 'production' && clipia_is_disallowed_worker_secret_for_production($secret)) {
+            return [
+                'ok'    => false,
+                'code'  => 503,
+                'error' => 'WORKER_SHARED_SECRET inválido para produção (valor de exemplo ou de desenvolvimento).',
+            ];
+        }
+
         // Em produção (Hostinger), exige tráfego HTTPS
         $isHttps = (!empty($serverVars['HTTPS']) && $serverVars['HTTPS'] !== 'off')
             || (($serverVars['SERVER_PORT'] ?? '') === '443')

@@ -243,6 +243,72 @@ class UserRepository
         }
     }
 
+    /**
+     * Cria o proprietário a partir do formulário de login quando a tabela users está vazia
+     * e CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN está ativo (padrão: sim em dev, não em produção).
+     */
+    public static function bootstrapOwnerFromFirstLoginIfAllowed(string $email, string $password): void
+    {
+        if (!defined('CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN') || !CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN) {
+            return;
+        }
+
+        $pdo = Database::getConnection();
+        if ($pdo === null) {
+            return;
+        }
+
+        $normalizedEmail = mb_strtolower(trim($email));
+        if ($normalizedEmail === '' || !filter_var($normalizedEmail, FILTER_VALIDATE_EMAIL)) {
+            return;
+        }
+
+        if (strlen($password) < 8) {
+            return;
+        }
+
+        try {
+            $count = (int)$pdo->query('SELECT COUNT(*) FROM users')->fetchColumn();
+            if ($count > 0) {
+                return;
+            }
+
+            $ownerName = trim((string)ADMIN_OWNER_NAME) ?: 'Administrador ClipIA';
+            $ownerHash = password_hash($password, PASSWORD_DEFAULT);
+            $now = date('Y-m-d H:i:s');
+
+            $stmt = $pdo->prepare(
+                'INSERT INTO users (
+                    name, email, password_hash, plan_tier,
+                    default_aspect_ratio, default_clips_count,
+                    default_min_duration, default_max_duration,
+                    email_notifications, accepted_terms_at, created_at, updated_at
+                ) VALUES (
+                    :name, :email, :password_hash, :plan_tier,
+                    :default_aspect_ratio, :default_clips_count,
+                    :default_min_duration, :default_max_duration,
+                    :email_notifications, :accepted_terms_at, :created_at, :updated_at
+                )'
+            );
+            $stmt->execute([
+                ':name'                 => $ownerName,
+                ':email'                => $normalizedEmail,
+                ':password_hash'        => $ownerHash,
+                ':plan_tier'            => 'owner',
+                ':default_aspect_ratio' => CLIP_DEFAULT_FORMAT,
+                ':default_clips_count'  => CLIP_DEFAULT_COUNT,
+                ':default_min_duration' => CLIP_DEFAULT_MIN_DURATION,
+                ':default_max_duration' => CLIP_DEFAULT_MAX_DURATION,
+                ':email_notifications'  => 1,
+                ':accepted_terms_at'    => $now,
+                ':created_at'           => $now,
+                ':updated_at'           => $now,
+            ]);
+        } catch (Throwable $e) {
+            error_log('[ClipIA bootstrapOwnerFromFirstLogin] ' . $e->getMessage());
+        }
+    }
+
     public static function touchLastLogin(int $userId): void
     {
         $pdo = Database::getConnection();

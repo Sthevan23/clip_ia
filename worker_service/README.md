@@ -63,9 +63,14 @@ O repositório publica **somente o PHP** na Hostinger. O worker roda **no seu PC
    - `CLIPIA_VERIFY_TLS=true`
    - `CLIPIA_AI_PROVIDER=local_heuristic`
    - `CLIPIA_ALLOW_PAID_API=false`
-3. Verifique **sem chamar a API**:
+3. Verifique **sem chamar a API** (PowerShell na raiz do projeto — evita `&&`, que falha em versões antigas do Windows):
    ```powershell
-   cd worker_service
+   Set-Location C:\caminho\para\projeto_clips
+   .\deploy\verify-local.ps1
+   ```
+   Ou só o worker:
+   ```powershell
+   Set-Location worker_service
    python verify_local_config.py
    ```
 4. Quando `hmac_ready=True`, teste a fila (smoke) ou processe um job:

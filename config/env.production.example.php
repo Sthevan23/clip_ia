@@ -16,7 +16,8 @@ declare(strict_types=1);
  * Obrigatório em produção (validação em config/clipia_env_loader.php):
  *   APP_ENV, DB_NAME, DB_USER, DB_PASS, WORKER_SHARED_SECRET (≥16 chars)
  *
- * Recomendado: APP_URL, WORKER_REQUIRE_HTTPS=1, ADMIN_OWNER_* (se users vazio)
+ * Recomendado: APP_URL, WORKER_REQUIRE_HTTPS=1, ADMIN_OWNER_* (se users vazio).
+ * Teste temporário no servidor (tabela users vazia): CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN=1 — desligue depois.
  *
  * Opcional: STORAGE_*, CLIPIA_MAX_*_BRL, WORKER_JOB_STALE_TIMEOUT_SECONDS
  *

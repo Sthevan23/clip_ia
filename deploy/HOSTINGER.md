@@ -10,14 +10,29 @@ Ambiente deste guia:
 | App no servidor | `/home/u586160337/domains/sthevandev.com.br/public_html/clipia/` |
 | Config privada | `/home/u586160337/domains/sthevandev.com.br/private/clipia.env.php` |
 
+**Guia hPanel (recomendado):** [`GUIA_PUBLICACAO_MANUAL.md`](GUIA_PUBLICACAO_MANUAL.md) · **Sequência:** [`PREPARACAO_PUBLICACAO.md`](PREPARACAO_PUBLICACAO.md)  
+**Validação manual passo a passo (sem expor credenciais):** [`CHECKLIST_VALIDACAO_PRODUCAO.md`](CHECKLIST_VALIDACAO_PRODUCAO.md)  
+**Worker no Windows:** [`WORKER_WINDOWS.md`](WORKER_WINDOWS.md) · **Revisão segurança (local):** [`SEGURANCA_REVISAO_LOCAL.md`](SEGURANCA_REVISAO_LOCAL.md)
+
 ---
 
-## 1. Conferir o Auto Deploy
+## 1. Publicar código PHP (Auto Deploy vs pacote filtrado)
+
+### Risco: Auto Deploy da raiz do repositório
+
+O repositório inclui **`worker_service/`** (worker Python, testes, `main.py`). Se o Auto Deploy copiar **toda a raiz** do Git para **`public_html/clipia`**, a pasta **`public_html/clipia/worker_service/`** pode ficar acessível na web (código e estrutura do worker — **não** é o destino correto; o `.env` do worker está no `.gitignore`, mas o código ainda não deve estar em `public_html`).
+
+**Recomendado para produção:**
+
+1. **`.\deploy\build-hostinger-package.ps1`** → subir **`deploy/clipia-hostinger-public.zip`** (FTP/Gerenciador) — contém só PHP/assets; o **`LEIA-ME-HOSTINGER.txt`** dentro do ZIP traz os passos essenciais.
+2. **Ou** Auto Deploy **somente** se no hPanel existirem **exclusões comprovadas** (ex.: não publicar `worker_service/`, `deploy/*.zip`, mídia em `storage/`, scripts em `storage/`). Após cada deploy, confirme no Gerenciador que **não** existe `public_html/clipia/worker_service/`.
+
+### Se usar Auto Deploy (Git)
 
 1. hPanel → **Git** / **Deploy** → repositório `Sthevan23/clip_ia`, branch **`main`**.
 2. Confirme que o destino é **`public_html/clipia`** (ou equivalente com subpasta `clipia`).
-3. Após push no GitHub, aguarde o deploy e verifique no Gerenciador de Arquivos se `public_html/clipia/index.php` foi atualizado.
-4. **Não** versione `.env`, `config/env.local.php`, `private/clipia.env.php` nem mídia de clientes.
+3. Após push no GitHub, aguarde o deploy e verifique no Gerenciador de Arquivos se `public_html/clipia/index.php` foi atualizado **e** se **`worker_service/` está ausente** de `public_html/clipia`.
+4. **Não** versione `.env`, `config/env.local.php`, `config/env.production.php`, `private/clipia.env.php` nem mídia de clientes.
 
 Se o site mostrar *“Configuração do servidor incompleta”* (HTTP 503), faltam credenciais — siga a seção 2.
 
@@ -124,13 +139,14 @@ Edite **`.env`** (nunca commitar):
 
 ## 8. Verificador offline (sem fila, sem HTTP de produção)
 
+Na **raiz do projeto** (PowerShell 5.1):
+
 ```powershell
-cd worker_service
-python verify_local_config.py
-python -m unittest test_hmac_compat_offline.py -v
+Set-Location C:\Users\Administrador\OneDrive\Desktop\projeto_clips
+.\deploy\verify-local.ps1
 ```
 
-Confirme: `allow_paid_api=False`, `ai_provider=local_heuristic`, `hmac_ready=True` (após preencher segredo), `hmac_self_test_ok=True`.
+Confirme: `allow_paid_api=False`, `ai_provider=local_heuristic`, `hmac_ready=True` (após preencher segredo), testes HMAC offline OK.
 
 ---
 
@@ -164,10 +180,11 @@ Até lá, use apenas `verify_local_config.py` e testes offline.
 
 | Onde | O quê |
 |------|--------|
-| GitHub `main` | Código PHP (Auto Deploy) |
-| `public_html/clipia/` | Aplicação publicada |
-| `domains/.../private/clipia.env.php` | Credenciais (manual) |
+| GitHub `main` | Código fonte completo (inclui `worker_service/` — **não** publique a raiz inteira em `public_html` sem exclusões) |
+| `deploy/clipia-hostinger-public.zip` | **Preferível:** só PHP para `public_html/clipia/` |
+| `public_html/clipia/` | Aplicação publicada (sem `worker_service/`) |
+| `domains/.../private/clipia.env.php` | Credenciais (manual; modelo no Git: `config/env.production.example.php`) |
 | MySQL | `schema.sql` importado |
 | Windows `worker_service/.env` | Worker + mesmo HMAC |
 
-Pacote ZIP manual (opcional): `.\deploy\build-hostinger-package.ps1` — não substitui o Auto Deploy se já configurado.
+Gerar ZIP: `.\deploy\build-hostinger-package.ps1` — o pacote **não** inclui `env.*.example.php` (evita copiar modelo para a árvore pública por engano).

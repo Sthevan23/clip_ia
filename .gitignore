@@ -46,6 +46,9 @@ __pycache__/
 /deploy/staging-hostinger/
 /deploy/*.zip
 
+# Artefato acidental de terminal (nao versionar; arquivo pode permanecer no disco)
+/tinger*
+
 # Logs e arquivos temporários
 *.log
 *.bak
