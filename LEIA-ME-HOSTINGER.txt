@@ -1,0 +1,63 @@
+﻿ClipIA â€” pacote Hostinger (FTP / upload manual)
+===============================================
+
+PUBLICACAO â€” LEIA PRIMEIRO
+--------------------------
+- Este ZIP contem SOMENTE PHP, assets e pastas vazias de storage para public_html/clipia/.
+- NAO inclui: worker_service/, .env, segredos, videos, logs nem modelos env.example.
+- Auto Deploy da branch main (raiz do repo) publica worker_service/, deploy/, samples, etc.
+  Use branch hostinger-public (somente esta arvore) â€” ver deploy/HOSTINGER_AUTO_DEPLOY.md.
+
+1) Extrair arquivos
+   Extraia todo o conteudo em:
+   public_html/clipia/
+
+2) MySQL (phpMyAdmin no hPanel)
+   - Crie banco e usuario MySQL e vincule permissoes.
+   - Importe o arquivo deste pacote: config/schema.sql
+   - Devem existir 8 tabelas (users, projects, source_videos, clip_candidates,
+     processing_jobs, usage_logs, monthly_budgets, budget_reservations).
+
+3) Configuracao privada (NUNCA dentro de public_html)
+   Caminho absoluto no servidor:
+   /home/u586160337/domains/sthevandev.com.br/private/clipia.env.php
+
+   Permissoes recomendadas: pasta private ~700; arquivo clipia.env.php ~600.
+
+   Como montar clipia.env.php:
+   - No seu PC, clone/abra o repositorio Git do ClipIA.
+   - Use como modelo config/env.production.example.php (NAO copie esse arquivo para public_html).
+   - Crie clipia.env.php com <?php return [ ... ]; e preencha no minimo:
+     APP_ENV=production, APP_URL=https://clipia.sthevandev.com.br,
+     DB_DRIVER=mysql, DB_HOST (geralmente 127.0.0.1 na Hostinger), DB_PORT, DB_NAME,
+     DB_USER, DB_PASS, WORKER_SHARED_SECRET (minimo 16 caracteres),
+     WORKER_REQUIRE_HTTPS=true.
+   - Se users estiver vazia: ADMIN_OWNER_EMAIL + ADMIN_OWNER_PASSWORD_HASH (recomendado),
+     OU temporariamente CLIPIA_BOOTSTRAP_OWNER_ON_FIRST_LOGIN=1 para criar admin no 1o login
+     (depois volte para 0). Bootstrap padrao no codigo: desligado.
+
+4) PHP no hPanel
+   - Versao PHP 8.2 ou superior.
+   - display_errors = Off.
+   - upload_max_filesize e post_max_size >= 100M (recomendado 128M).
+
+5) Worker Python (seu PC Windows â€” FORA da Hostinger)
+   - Instale worker_service/ apenas no computador local, nunca em public_html.
+   - CLIPIA_WORKER_SHARED_SECRET no .env local deve ser o MESMO valor de
+     WORKER_SHARED_SECRET em private/clipia.env.php (compare apenas no servidor/PC,
+     nunca envie segredos por e-mail ou chat).
+   - Nao rode processamento de jobs ate o site carregar sem erro 503 e login OK.
+
+6) Verificacao rapida no navegador
+   - https://clipia.sthevandev.com.br/ nao deve mostrar "Configuracao do servidor incompleta".
+   - /login.php deve exibir o formulario (sem erro de banco na tela).
+
+Documentacao no PC (repositorio Git, nao vai no ZIP):
+  deploy/INICIO_RAPIDO_HOSTINGER.md  (minimo manual â€” comece aqui)
+  deploy/GUIA_PUBLICACAO_MANUAL.md   (passo a passo completo)
+  deploy/PREPARACAO_PUBLICACAO.md
+  deploy/CHECKLIST_VALIDACAO_PRODUCAO.md
+  deploy/HOSTINGER.md
+  deploy/WORKER_WINDOWS.md
+
+Apos extrair: confira arquivos proibidos (GUIA part. 2.3 ou PREPARACAO secao 3.2).

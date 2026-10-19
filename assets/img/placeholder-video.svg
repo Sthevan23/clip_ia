@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" fill="none">
+  <rect width="640" height="360" rx="16" fill="#0D0F17"/>
+  <rect x="1.5" y="1.5" width="637" height="357" rx="14.5" stroke="#25293A" stroke-width="3" stroke-dasharray="8 8"/>
+  <circle cx="320" cy="158" r="38" fill="#171A26" stroke="#7C3AED" stroke-width="2"/>
+  <polygon points="312,143 338,158 312,173" fill="#A78BFA"/>
+  <text x="320" y="226" text-anchor="middle" fill="#94A3B8" font-family="Inter, sans-serif" font-size="15" font-weight="500">Prévia reservada para título e miniatura do vídeo</text>
+  <text x="320" y="250" text-anchor="middle" fill="#64748B" font-family="Inter, sans-serif" font-size="13">Cole um link válido do YouTube e clique em "Validar link"</text>
+</svg>

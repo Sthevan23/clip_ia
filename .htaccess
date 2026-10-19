@@ -1,0 +1,43 @@
+# ============================================================================
+# ClipIA — Configuração Apache / LiteSpeed (Hostinger Business)
+# ============================================================================
+
+DirectoryIndex index.php
+AddDefaultCharset UTF-8
+
+# Impedir listagem de diretórios
+Options -Indexes
+
+# Redirecionamento HTTPS em produção (Hostinger / LiteSpeed / Proxies reversos)
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Bloqueia acesso direto via HTTP às pastas internas de código e armazenamento
+    RewriteRule ^(config|includes|storage|worker_service|uploads)(/|$) - [F,L,NC]
+
+    # Força HTTPS em domínios públicos (ignora localhost e 127.0.0.1 para desenvolvimento)
+    RewriteCond %{HTTP_HOST} !^(localhost|127\.0\.0\.1)(:[0-9]+)?$ [NC]
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP:X-Forwarded-Proto} !https [NC]
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+# Proteger arquivos sensíveis (.sql, .env, configurações locais de credenciais, testes, markdown)
+<FilesMatch "(^\.env(\..+)?$|\.(sql|env|ini|log|sh|bak|sqlite|db|md|py|lock|key|pem)$|^env\.(local|production|example)\.php$|^test_.*\.(php|py)$)">
+    Require all denied
+</FilesMatch>
+
+# Cabeçalhos de segurança para produção
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    Header set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains" "expr=%{HTTPS} == 'on' || %{HTTP:X-Forwarded-Proto} == 'https'"
+</IfModule>
+
+# Compressão GZIP / Deflate para ativos estáticos
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript image/svg+xml
+</IfModule>
+
