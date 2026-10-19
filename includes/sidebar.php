@@ -25,9 +25,9 @@ $projectsCount = (int)($stats['total_projects'] ?? 0);
     </div>
 
     <div class="sidebar-cta">
-        <a href="new-project.php" class="btn btn-primary btn-block">
+        <a href="create-clips.php" class="btn btn-primary btn-block">
             <?= clipia_icon('plus-circle', 18) ?>
-            <span>Criar novos cortes</span>
+            <span>Criar clipes</span>
         </a>
     </div>
 
@@ -41,9 +41,9 @@ $projectsCount = (int)($stats['total_projects'] ?? 0);
                 </a>
             </li>
             <li>
-                <a href="new-project.php" class="sidebar-link <?= $activeNav === 'new-project' ? 'is-active' : '' ?>" <?= $activeNav === 'new-project' ? 'aria-current="page"' : '' ?>>
+                <a href="create-clips.php" class="sidebar-link <?= in_array($activeNav, ['create-clips', 'new-project'], true) ? 'is-active' : '' ?>" <?= $activeNav === 'create-clips' ? 'aria-current="page"' : '' ?>>
                     <?= clipia_icon('sparkles', 19) ?>
-                    <span>Novo projeto</span>
+                    <span>Criar clipes</span>
                 </a>
             </li>
             <li>

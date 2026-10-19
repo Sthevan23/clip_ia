@@ -23,9 +23,9 @@ $userProfile = get_current_user_profile();
     </div>
 
     <div class="topbar-right">
-        <a href="new-project.php" class="btn btn-primary btn-sm topbar-cta">
+        <a href="create-clips.php" class="btn btn-primary btn-sm topbar-cta">
             <?= clipia_icon('plus', 16) ?>
-            <span>Criar novos cortes</span>
+            <span>Criar clipes</span>
         </a>
 
         <form action="logout.php" method="POST" style="margin: 0;">

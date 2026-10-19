@@ -8,8 +8,8 @@ declare(strict_types=1);
  * 1. A hospedagem compartilhada Hostinger executa apenas PHP + MySQL.
  * 2. O serviço Python roda em ambiente separado e comunica-se via HTTPS usando assinatura HMAC-SHA256
  *    (`X-ClipIA-Timestamp` + `X-ClipIA-Signature`) sobre o corpo bruto da requisição.
- * 3. Aceita apenas tarefas cuja fonte de vídeo seja autorizada (`source_mode = 'uploaded_file'`)
- *    e nunca processa URLs arbitrárias enviadas por usuários.
+ * 3. Aceita tarefas com arquivo enviado (`uploaded_file`) ou URL HTTPS de mídia direta validada
+ *    (`direct_media_url`, sem YouTube). URLs arbitrárias nunca são expostas ao navegador.
  */
 
 require_once __DIR__ . '/../config/app.php';
@@ -54,6 +54,7 @@ class ExternalWorkerClient implements ProcessingServiceInterface
                 'uploaded_file_path' => $projectData['uploaded_file_path'] ?? null,
                 'uploaded_file_name' => $projectData['uploaded_file_name'] ?? null,
                 'uploaded_file_mime' => $projectData['uploaded_file_mime'] ?? null,
+                'authorized_media_url' => $projectData['authorized_media_url'] ?? null,
             ],
             'clip_parameters' => [
                 'target_clips_count'   => (int)($projectData['target_clips_count'] ?? CLIP_DEFAULT_COUNT),

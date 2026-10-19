@@ -346,6 +346,9 @@
         const modalThumbFallback = document.getElementById('modalThumbFallback');
         const modalAttachForm = document.getElementById('modalAttachSourceForm');
         const modalAttachProjectId = document.getElementById('modalAttachProjectId');
+        const modalGenerateForm = document.getElementById('modalGenerateClipsForm');
+        const modalGenerateProjectId = document.getElementById('modalGenerateProjectId');
+        const modalDirectMediaUrl = document.getElementById('modalDirectMediaUrl');
 
         document.querySelectorAll('[data-open-project]').forEach((btn) => {
             btn.addEventListener('click', () => {
@@ -370,9 +373,18 @@
                 document.getElementById('modalProjectFormat').textContent = format;
                 document.getElementById('modalProjectClips').textContent = clips;
                 document.getElementById('modalProjectStatus').textContent = statusLabel;
-                document.getElementById('modalProjectSourceFile').textContent = uploadedFile !== ''
-                    ? `Arquivo enviado (${uploadedFile})`
-                    : 'Pendente (Apenas link de referência)';
+                const sourceMode = btn.getAttribute('data-source-mode') || 'url_only';
+                const authorizedMediaUrl = btn.getAttribute('data-authorized-media-url') || '';
+                let sourceLabel = 'Pendente (referência YouTube — envie arquivo ou URL HTTPS direta)';
+                if (uploadedFile !== '') {
+                    sourceLabel = `Arquivo enviado (${uploadedFile})`;
+                } else if (sourceMode === 'direct_media_url' && authorizedMediaUrl !== '') {
+                    const shortUrl = authorizedMediaUrl.length > 52
+                        ? `${authorizedMediaUrl.substring(0, 52)}…`
+                        : authorizedMediaUrl;
+                    sourceLabel = `URL de mídia autorizada (${shortUrl})`;
+                }
+                document.getElementById('modalProjectSourceFile').textContent = sourceLabel;
 
                 if (embedAllowed && embedUrl && modalEmbedFrame) {
                     modalEmbedFrame.src = embedUrl;
@@ -392,6 +404,15 @@
                 if (modalAttachForm && modalAttachProjectId) {
                     modalAttachProjectId.value = projId;
                     modalAttachForm.style.display = (statusKey === 'awaiting_source') ? 'block' : 'none';
+                }
+
+                const showGenerate = ['awaiting_source', 'awaiting_processing', 'failed'].includes(statusKey);
+                if (modalGenerateForm && modalGenerateProjectId) {
+                    modalGenerateProjectId.value = projId;
+                    modalGenerateForm.style.display = showGenerate ? 'block' : 'none';
+                }
+                if (modalDirectMediaUrl) {
+                    modalDirectMediaUrl.value = authorizedMediaUrl;
                 }
 
                 projectDetailModal.classList.add('is-open');
@@ -504,5 +525,45 @@
                 copyTextWithFeedback(bundle, btn, 'Tudo copiado!');
             });
         });
+
+        // Estúdio — polling de progresso (sem expor segredos)
+        const studioRoot = document.getElementById('projectStudioRoot');
+        if (studioRoot && studioRoot.getAttribute('data-poll-active') === '1') {
+            const projectId = studioRoot.getAttribute('data-project-id');
+            const progressFill = document.getElementById('studioProgressFill');
+            const statusLabel = document.getElementById('studioStatusLabel');
+            const errorBox = document.getElementById('studioErrorBox');
+
+            const poll = async () => {
+                if (!projectId) return;
+                try {
+                    const resp = await fetch(`pages/project-status.php?project_id=${encodeURIComponent(projectId)}`, {
+                        credentials: 'same-origin',
+                        headers: { Accept: 'application/json' },
+                    });
+                    const data = await resp.json();
+                    if (!data.ok || !data.snapshot) return;
+                    const snap = data.snapshot;
+                    if (progressFill) {
+                        progressFill.style.width = `${snap.progress_percent}%`;
+                    }
+                    if (statusLabel) {
+                        statusLabel.textContent = snap.status_label || snap.status;
+                    }
+                    if (errorBox && snap.status === 'failed' && snap.last_error) {
+                        errorBox.style.display = '';
+                        errorBox.textContent = snap.last_error;
+                    }
+                    if (snap.status === 'completed' || snap.status === 'failed') {
+                        window.location.reload();
+                    }
+                } catch (_) {
+                    /* silencioso — próxima tentativa */
+                }
+            };
+
+            poll();
+            window.setInterval(poll, 8000);
+        }
     });
 })();

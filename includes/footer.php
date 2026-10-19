@@ -33,7 +33,7 @@ $layoutType = $layoutType ?? 'public';
                         <li><a href="index.php#demonstracao">Demonstração visual</a></li>
                         <li><a href="index.php#recursos">Recursos</a></li>
                         <li><a href="dashboard.php">Acessar Dashboard</a></li>
-                        <li><a href="new-project.php">Novo Projeto</a></li>
+                        <li><a href="create-clips.php">Criar clipes</a></li>
                     </ul>
                 </div>
 

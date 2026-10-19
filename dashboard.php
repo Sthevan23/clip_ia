@@ -81,9 +81,9 @@ require_once __DIR__ . '/includes/header.php';
                         <h2 id="recent-projects-heading" class="panel-title">Projetos Recentes</h2>
                         <div style="display:flex; gap:8px;">
                             <a href="projects.php" class="btn btn-xs btn-outline">Ver todos</a>
-                            <a href="new-project.php" class="btn btn-xs btn-primary">
+                            <a href="create-clips.php" class="btn btn-xs btn-primary">
                                 <?= clipia_icon('plus', 14) ?>
-                                <span>Criar novos cortes</span>
+                                <span>Criar clipes</span>
                             </a>
                         </div>
                     </div>
@@ -97,12 +97,12 @@ require_once __DIR__ . '/includes/header.php';
                                 </div>
                                 <h3 class="empty-state-title">Nenhum projeto criado até o momento</h3>
                                 <p class="empty-state-text">
-                                    Sua conta ainda não possui projetos configurados. Comece criando um novo projeto para validar uma URL do YouTube e definir seus cortes 9:16.
+                                    Envie um vídeo ou cole uma URL HTTPS direta para gerar clipes verticais automaticamente.
                                 </p>
                                 <div class="empty-state-actions">
-                                    <a href="new-project.php" class="btn btn-primary btn-sm">
+                                    <a href="create-clips.php" class="btn btn-primary btn-sm">
                                         <?= clipia_icon('plus-circle', 16) ?>
-                                        <span>Criar novos cortes</span>
+                                        <span>Criar clipes</span>
                                     </a>
                                 </div>
                             </div>

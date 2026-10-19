@@ -258,6 +258,66 @@ class VideoUploadManager
     }
 
     /**
+     * Armazena um arquivo de vídeo já validado em disco (ingestão HMAC do worker Python).
+     *
+     * @param array{tmp_path: string, original_name: string, size_bytes: int, mime_type: string} $fileMeta
+     */
+    public static function storeIngestedTempFile(int $userId, array $fileMeta): array
+    {
+        $tmpPath = (string)($fileMeta['tmp_path'] ?? '');
+        $origName = basename((string)($fileMeta['original_name'] ?? 'video.mp4'));
+        $fileSize = (int)($fileMeta['size_bytes'] ?? 0);
+        $detectedMime = (string)($fileMeta['mime_type'] ?? '');
+
+        if ($tmpPath === '' || !is_file($tmpPath)) {
+            throw new DomainException('Arquivo temporário de ingestão não localizado.');
+        }
+        if ($fileSize <= 0) {
+            throw new DomainException('O arquivo de vídeo ingerido está vazio.');
+        }
+        if ($detectedMime === '' || !isset(self::ALLOWED_MIMES[$detectedMime])) {
+            throw new DomainException('Formato de vídeo ingerido não permitido (MP4, MOV ou WebM).');
+        }
+
+        $maxFileSize = defined('STORAGE_MAX_FILE_SIZE_BYTES')
+            ? (int)STORAGE_MAX_FILE_SIZE_BYTES
+            : self::MAX_FILE_SIZE_BYTES;
+        if ($fileSize > $maxFileSize) {
+            $maxMb = (int)round($maxFileSize / 1048576);
+            throw new DomainException("O arquivo excede o limite de {$maxMb} MB para armazenamento.");
+        }
+
+        $ext = self::ALLOWED_MIMES[$detectedMime];
+        $uploadBaseDir = self::getUploadDirectory();
+        self::ensureProtectedDirectory($uploadBaseDir);
+        self::purgeExpiredMediaFiles();
+        self::enforceStorageQuotas($userId, $fileSize, $uploadBaseDir);
+
+        $safeFileName = sprintf(
+            'u%d_%s_%s.%s',
+            $userId,
+            date('Ymd_His'),
+            bin2hex(random_bytes(8)),
+            $ext
+        );
+        $destinationPath = $uploadBaseDir . '/' . $safeFileName;
+        if (!copy($tmpPath, $destinationPath)) {
+            throw new RuntimeException('Não foi possível armazenar o vídeo ingerido no servidor.');
+        }
+        @chmod($destinationPath, 0640);
+
+        $safeOriginalName = preg_replace('/[^A-Za-z0-9._ -]/', '_', $origName) ?: ('video.' . $ext);
+        $relDir = defined('STORAGE_UPLOADS_REL_DIR') ? (string)STORAGE_UPLOADS_REL_DIR : 'storage/uploads';
+
+        return [
+            'relative_path' => $relDir . '/' . $safeFileName,
+            'original_name' => mb_substr($safeOriginalName, 0, 255),
+            'mime_type'     => $detectedMime,
+            'size_bytes'    => $fileSize,
+        ];
+    }
+
+    /**
      * Resolve de forma segura um caminho relativo de mídia autorizada dentro do projeto,
      * prevenindo Path Traversal e suportando tanto `storage/uploads` quanto o legado `uploads/videos`.
      */

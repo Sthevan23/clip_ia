@@ -91,6 +91,7 @@ CREATE TABLE IF NOT EXISTS `source_videos` (
     `uploaded_file_name` VARCHAR(255) DEFAULT NULL,
     `uploaded_file_mime` VARCHAR(100) DEFAULT NULL,
     `uploaded_file_size` BIGINT UNSIGNED DEFAULT NULL,
+    `authorized_media_url` VARCHAR(500) DEFAULT NULL,
     `duration_seconds` INT UNSIGNED DEFAULT NULL,
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),

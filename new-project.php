@@ -1,8 +1,13 @@
 <?php
 declare(strict_types=1);
 
+if (!isset($_GET['advanced'])) {
+    header('Location: create-clips.php', true, 302);
+    exit;
+}
+
 /**
- * ClipIA — 5. Página de Novo Projeto
+ * ClipIA — 5. Página de Novo Projeto (modo avançado)
  * Criação de projetos a partir de links públicos suportados do YouTube:
  * - Validação estrita do domínio e ID no servidor (rejeitando domínios arbitrários, IPs e redirecionamentos)
  * - Integração compatível com políticas via YouTube oEmbed + Player Incorporado oficial

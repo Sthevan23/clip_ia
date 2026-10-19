@@ -9,6 +9,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/worker_client.php';
 require_once __DIR__ . '/video_upload.php';
+require_once __DIR__ . '/direct_media_url.php';
 require_once __DIR__ . '/subtitles_metadata.php';
 
 /**
@@ -556,6 +557,10 @@ class ProjectRepository
         $uploadedFileName = isset($data['uploaded_file_name']) ? (string)$data['uploaded_file_name'] : null;
         $uploadedFileMime = isset($data['uploaded_file_mime']) ? (string)$data['uploaded_file_mime'] : null;
         $uploadedFileSize = isset($data['uploaded_file_size']) ? (int)$data['uploaded_file_size'] : null;
+        $authorizedMediaUrl = isset($data['authorized_media_url']) ? trim((string)$data['authorized_media_url']) : null;
+        if ($authorizedMediaUrl === '') {
+            $authorizedMediaUrl = null;
+        }
 
         $targetClipsCount = (int)$data['target_clips_count'];
         $minDuration      = (int)$data['min_duration_seconds'];
@@ -576,9 +581,9 @@ class ProjectRepository
             $videoTitle = $title;
         }
 
-        $initialProjectStatus = ($sourceMode === 'uploaded_file' && !empty($uploadedFilePath))
-            ? 'awaiting_processing'
-            : 'awaiting_source';
+        $hasQueuedSource = ($sourceMode === 'uploaded_file' && !empty($uploadedFilePath))
+            || ($sourceMode === 'direct_media_url' && $authorizedMediaUrl !== null);
+        $initialProjectStatus = $hasQueuedSource ? 'awaiting_processing' : 'awaiting_source';
 
         $workerClient = new ExternalWorkerClient();
 
@@ -620,19 +625,19 @@ class ProjectRepository
                     external_video_id, video_title, author_name, thumbnail_url,
                     embed_url, embed_allowed,
                     uploaded_file_path, uploaded_file_name, uploaded_file_mime, uploaded_file_size,
-                    created_at
+                    authorized_media_url, created_at
                 ) VALUES (
                     :project_id, :user_id, :provider, :source_mode, :source_url,
                     :external_video_id, :video_title, :author_name, :thumbnail_url,
                     :embed_url, :embed_allowed,
                     :uploaded_file_path, :uploaded_file_name, :uploaded_file_mime, :uploaded_file_size,
-                    :created_at
+                    :authorized_media_url, :created_at
                 )'
             );
             $stmtVideo->execute([
                 ':project_id'         => $projectId,
                 ':user_id'            => $userId,
-                ':provider'           => 'youtube',
+                ':provider'           => ($sourceMode === 'direct_media_url') ? 'direct_https' : 'youtube',
                 ':source_mode'        => $sourceMode,
                 ':source_url'         => $sourceUrl,
                 ':external_video_id'  => $externalVideoId,
@@ -645,6 +650,7 @@ class ProjectRepository
                 ':uploaded_file_name' => $uploadedFileName,
                 ':uploaded_file_mime' => $uploadedFileMime,
                 ':uploaded_file_size' => $uploadedFileSize,
+                ':authorized_media_url' => $authorizedMediaUrl,
                 ':created_at'         => $now,
             ]);
 
@@ -657,6 +663,7 @@ class ProjectRepository
                 'uploaded_file_path'   => $uploadedFilePath,
                 'uploaded_file_name'   => $uploadedFileName,
                 'uploaded_file_mime'   => $uploadedFileMime,
+                'authorized_media_url' => $authorizedMediaUrl,
                 'target_clips_count'   => $targetClipsCount,
                 'min_duration_seconds' => $minDuration,
                 'max_duration_seconds' => $maxDuration,
@@ -804,6 +811,232 @@ class ProjectRepository
     }
 
     /**
+     * Vincula URL HTTPS de mídia direta (não YouTube) e enfileira processamento.
+     */
+    public static function attachDirectMediaUrlForUser(int $projectId, int $userId, string $mediaUrl): bool
+    {
+        $check = DirectMediaUrlValidator::validate($mediaUrl);
+        if (!$check['valid'] || $check['normalized_url'] === null) {
+            throw new DomainException($check['error'] ?? 'URL de mídia inválida.');
+        }
+        $normalizedUrl = $check['normalized_url'];
+
+        $pdo = Database::getConnection();
+        if ($pdo === null) {
+            return false;
+        }
+
+        $existing = self::findByIdForUser($projectId, $userId);
+        if ($existing === null) {
+            return false;
+        }
+
+        $blockedStatuses = ['processing'];
+        if (in_array((string)($existing['status'] ?? ''), $blockedStatuses, true)) {
+            throw new DomainException('Aguarde o término do processamento em andamento antes de alterar a fonte.');
+        }
+
+        $workerClient = new ExternalWorkerClient();
+        $updatedPayloadArray = $workerClient->buildJobPayload([
+            'project_id'           => $projectId,
+            'user_id'              => $userId,
+            'source_mode'          => 'direct_media_url',
+            'source_url'           => $existing['source_url'] ?? '',
+            'external_video_id'    => $existing['video_external_id'] ?? '',
+            'authorized_media_url' => $normalizedUrl,
+            'target_clips_count'   => $existing['target_clips'] ?? CLIP_DEFAULT_COUNT,
+            'min_duration_seconds' => $existing['min_duration'] ?? CLIP_DEFAULT_MIN_DURATION,
+            'max_duration_seconds' => $existing['max_duration'] ?? CLIP_DEFAULT_MAX_DURATION,
+            'aspect_ratio'         => $existing['aspect_ratio'] ?? CLIP_DEFAULT_FORMAT,
+            'subtitle_style'       => $existing['subtitle_style'] ?? SubtitleMetadataHelper::getDefaultSubtitleStyle(),
+        ]);
+        $updatedPayloadJson = json_encode($updatedPayloadArray, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
+        $now = date('Y-m-d H:i:s');
+        $pdo->beginTransaction();
+
+        try {
+            $stmtVideo = $pdo->prepare(
+                'UPDATE source_videos
+                 SET source_mode = :source_mode,
+                     authorized_media_url = :media_url,
+                     uploaded_file_path = NULL,
+                     uploaded_file_name = NULL,
+                     uploaded_file_mime = NULL,
+                     uploaded_file_size = NULL
+                 WHERE project_id = :project_id AND user_id = :user_id'
+            );
+            $stmtVideo->execute([
+                ':source_mode' => 'direct_media_url',
+                ':media_url'   => $normalizedUrl,
+                ':project_id'  => $projectId,
+                ':user_id'     => $userId,
+            ]);
+
+            $stmtProj = $pdo->prepare(
+                "UPDATE projects
+                 SET status = 'awaiting_processing', updated_at = :now
+                 WHERE id = :id AND user_id = :user_id"
+            );
+            $stmtProj->execute([
+                ':now'     => $now,
+                ':id'      => $projectId,
+                ':user_id' => $userId,
+            ]);
+
+            $stmtJob = $pdo->prepare(
+                "UPDATE processing_jobs
+                 SET status = 'queued', payload_json = :payload_json, error_message = NULL, updated_at = :now
+                 WHERE project_id = :project_id AND user_id = :user_id"
+            );
+            $stmtJob->execute([
+                ':payload_json' => $updatedPayloadJson,
+                ':now'          => $now,
+                ':project_id'   => $projectId,
+                ':user_id'      => $userId,
+            ]);
+
+            $pdo->commit();
+
+            UsageLogRepository::log(
+                $userId,
+                'source_direct_url',
+                sprintf('URL de mídia autorizada vinculada ao projeto "%s".', $existing['title']),
+                $projectId
+            );
+
+            return true;
+        } catch (Throwable $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            error_log('[ClipIA attachDirectMediaUrlForUser Error] ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Ação "Gerar clipes" no painel: enfileira URL direta, arquivo já enviado ou informa limite do YouTube.
+     *
+     * @return array{ok: bool, message: string}
+     */
+    public static function queueGenerateClipsForUser(int $projectId, int $userId, ?string $directMediaUrlInput): array
+    {
+        $existing = self::findByIdForUser($projectId, $userId);
+        if ($existing === null) {
+            return ['ok' => false, 'message' => 'Projeto não encontrado ou sem permissão.'];
+        }
+
+        $directUrl = trim((string)$directMediaUrlInput);
+        if ($directUrl !== '') {
+            try {
+                if (self::attachDirectMediaUrlForUser($projectId, $userId, $directUrl)) {
+                    return [
+                        'ok'      => true,
+                        'message' => 'URL de vídeo autorizada registrada. O worker irá obter o arquivo e gerar os clipes na fila.',
+                    ];
+                }
+                return ['ok' => false, 'message' => 'Não foi possível enfileirar a URL informada.'];
+            } catch (DomainException $e) {
+                return ['ok' => false, 'message' => $e->getMessage()];
+            }
+        }
+
+        $mode = (string)($existing['source_mode'] ?? 'url_only');
+        if ($mode === 'uploaded_file' && ($existing['uploaded_file_path'] ?? '') !== '') {
+            try {
+                if (self::requeueAuthorizedProjectForUser($projectId, $userId, $existing)) {
+                    return [
+                        'ok'      => true,
+                        'message' => 'Projeto na fila de processamento. Execute o worker Python no Windows para gerar os clipes.',
+                    ];
+                }
+            } catch (DomainException $e) {
+                return ['ok' => false, 'message' => $e->getMessage()];
+            }
+            return ['ok' => false, 'message' => 'Não foi possível reenfileirar o projeto.'];
+        }
+
+        if ($mode === 'direct_media_url' && ($existing['authorized_media_url'] ?? '') !== '') {
+            try {
+                if (self::requeueAuthorizedProjectForUser($projectId, $userId, $existing)) {
+                    return [
+                        'ok'      => true,
+                        'message' => 'Download e processamento enfileirados. O worker obterá o vídeo na URL autorizada.',
+                    ];
+                }
+            } catch (DomainException $e) {
+                return ['ok' => false, 'message' => $e->getMessage()];
+            }
+            return ['ok' => false, 'message' => 'Não foi possível reenfileirar o projeto.'];
+        }
+
+        return [
+            'ok'      => false,
+            'message' => 'O link do YouTube serve apenas como referência. Informe uma URL HTTPS direta do arquivo (.mp4/.mov/.webm) que você tem direito de usar, ou envie o vídeo manualmente abaixo.',
+        ];
+    }
+
+    private static function requeueAuthorizedProjectForUser(int $projectId, int $userId, array $existing): bool
+    {
+        if ((string)($existing['status'] ?? '') === 'processing') {
+            throw new DomainException('Este projeto já está em processamento.');
+        }
+
+        $pdo = Database::getConnection();
+        if ($pdo === null) {
+            return false;
+        }
+
+        $workerClient = new ExternalWorkerClient();
+        $payloadData = [
+            'project_id'           => $projectId,
+            'user_id'              => $userId,
+            'source_mode'          => $existing['source_mode'],
+            'source_url'           => $existing['source_url'] ?? '',
+            'external_video_id'    => $existing['video_external_id'] ?? '',
+            'target_clips_count'   => $existing['target_clips'] ?? CLIP_DEFAULT_COUNT,
+            'min_duration_seconds' => $existing['min_duration'] ?? CLIP_DEFAULT_MIN_DURATION,
+            'max_duration_seconds' => $existing['max_duration'] ?? CLIP_DEFAULT_MAX_DURATION,
+            'aspect_ratio'         => $existing['aspect_ratio'] ?? CLIP_DEFAULT_FORMAT,
+            'subtitle_style'       => $existing['subtitle_style'] ?? SubtitleMetadataHelper::getDefaultSubtitleStyle(),
+        ];
+        if (($existing['source_mode'] ?? '') === 'uploaded_file') {
+            $payloadData['uploaded_file_path'] = $existing['uploaded_file_path'] ?? null;
+            $payloadData['uploaded_file_name'] = $existing['uploaded_file_name'] ?? null;
+            $payloadData['uploaded_file_mime'] = 'video/mp4';
+        }
+        if (($existing['source_mode'] ?? '') === 'direct_media_url') {
+            $payloadData['authorized_media_url'] = $existing['authorized_media_url'] ?? null;
+        }
+
+        $updatedPayloadJson = json_encode($workerClient->buildJobPayload($payloadData), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $now = date('Y-m-d H:i:s');
+
+        try {
+            $pdo->prepare(
+                "UPDATE projects SET status = 'awaiting_processing', updated_at = :now WHERE id = :id AND user_id = :user_id"
+            )->execute([':now' => $now, ':id' => $projectId, ':user_id' => $userId]);
+
+            $pdo->prepare(
+                "UPDATE processing_jobs
+                 SET status = 'queued', payload_json = :payload, error_message = NULL, updated_at = :now
+                 WHERE project_id = :project_id AND user_id = :user_id"
+            )->execute([
+                ':payload'    => $updatedPayloadJson,
+                ':now'        => $now,
+                ':project_id' => $projectId,
+                ':user_id'    => $userId,
+            ]);
+
+            return true;
+        } catch (Throwable $e) {
+            error_log('[ClipIA requeueAuthorizedProjectForUser Error] ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Permite ao usuário proprietário repetir (retry) uma tarefa que tenha falhado (`failed`).
      */
     public static function retryFailedProjectForUser(int $projectId, int $userId): bool
@@ -894,6 +1127,89 @@ class ProjectRepository
         ]);
 
         return $stmt->fetchAll();
+    }
+
+    /**
+     * Snapshot leve para acompanhamento de progresso no estúdio (polling autenticado).
+     *
+     * @return array<string, mixed>|null
+     */
+    public static function getStudioSnapshotForUser(int $projectId, int $userId): ?array
+    {
+        $project = self::findByIdForUser($projectId, $userId);
+        if ($project === null) {
+            return null;
+        }
+
+        $pdo = Database::getConnection();
+        $jobStatus = 'pending';
+        $jobAttempts = 0;
+        if ($pdo !== null) {
+            $stmt = $pdo->prepare(
+                'SELECT status, attempts, error_message
+                 FROM processing_jobs
+                 WHERE project_id = :project_id AND user_id = :user_id
+                 ORDER BY id DESC LIMIT 1'
+            );
+            $stmt->execute([':project_id' => $projectId, ':user_id' => $userId]);
+            $jobRow = $stmt->fetch();
+            if ($jobRow) {
+                $jobStatus = (string)($jobRow['status'] ?? 'pending');
+                $jobAttempts = (int)($jobRow['attempts'] ?? 0);
+            }
+        }
+
+        $candidates = self::listCandidatesByProjectForUser($projectId, $userId);
+        $clipsReady = 0;
+        $clipSummaries = [];
+        foreach ($candidates as $cand) {
+            $hasMp4 = !empty($cand['storage_url']);
+            if ($hasMp4) {
+                $clipsReady++;
+            }
+            $clipSummaries[] = [
+                'id'               => (int)$cand['id'],
+                'title'            => (string)$cand['title'],
+                'duration_seconds' => round((float)($cand['duration_seconds'] ?? 0), 1),
+                'has_mp4'          => $hasMp4,
+                'relevance_score'  => (int)($cand['relevance_score'] ?? 0),
+            ];
+        }
+
+        $statusKey = (string)($project['status'] ?? 'awaiting_source');
+        $progressStep = match ($statusKey) {
+            'awaiting_source'      => 1,
+            'awaiting_processing'  => 2,
+            'processing'           => 3,
+            'completed'            => 4,
+            'failed'               => 3,
+            default                => 1,
+        };
+        $progressPercent = match ($statusKey) {
+            'awaiting_source'      => 15,
+            'awaiting_processing'  => 40,
+            'processing'           => 70,
+            'completed'            => 100,
+            'failed'               => 70,
+            default                => 10,
+        };
+
+        return [
+            'project_id'        => $projectId,
+            'title'             => (string)$project['title'],
+            'status'            => $statusKey,
+            'status_label'      => (string)($project['status_label'] ?? ''),
+            'source_mode'       => (string)($project['source_mode'] ?? ''),
+            'target_clips'      => (int)($project['target_clips'] ?? 0),
+            'generated_clips'   => (int)($project['GeneratedClips'] ?? 0),
+            'clips_with_mp4'    => $clipsReady,
+            'job_status'        => $jobStatus,
+            'job_attempts'      => $jobAttempts,
+            'last_error'        => (string)($project['last_error_message'] ?? ''),
+            'progress_step'     => $progressStep,
+            'progress_percent'  => $progressPercent,
+            'clips'             => $clipSummaries,
+        ];
     }
 
     /**
@@ -1081,6 +1397,7 @@ class ProjectRepository
                 sv.uploaded_file_path,
                 sv.uploaded_file_name,
                 sv.uploaded_file_size,
+                sv.authorized_media_url,
                 (SELECT COUNT(*) FROM clip_candidates cc WHERE cc.project_id = p.id AND cc.user_id = p.user_id) AS generated_clips_count,
                 (SELECT pj.error_message FROM processing_jobs pj WHERE pj.project_id = p.id AND pj.user_id = p.user_id ORDER BY pj.id DESC LIMIT 1) AS last_error_message,
                 (SELECT pj.attempts FROM processing_jobs pj WHERE pj.project_id = p.id AND pj.user_id = p.user_id ORDER BY pj.id DESC LIMIT 1) AS job_attempts
@@ -1128,6 +1445,7 @@ class ProjectRepository
                 sv.uploaded_file_path,
                 sv.uploaded_file_name,
                 sv.uploaded_file_size,
+                sv.authorized_media_url,
                 (SELECT COUNT(*) FROM clip_candidates cc WHERE cc.project_id = p.id AND cc.user_id = p.user_id) AS generated_clips_count,
                 (SELECT pj.error_message FROM processing_jobs pj WHERE pj.project_id = p.id AND pj.user_id = p.user_id ORDER BY pj.id DESC LIMIT 1) AS last_error_message,
                 (SELECT pj.attempts FROM processing_jobs pj WHERE pj.project_id = p.id AND pj.user_id = p.user_id ORDER BY pj.id DESC LIMIT 1) AS job_attempts
@@ -1343,6 +1661,7 @@ class ProjectRepository
             'uploaded_file_path' => (string)($row['uploaded_file_path'] ?? ''),
             'uploaded_file_name' => (string)($row['uploaded_file_name'] ?? ''),
             'uploaded_file_size' => isset($row['uploaded_file_size']) ? (int)$row['uploaded_file_size'] : 0,
+            'authorized_media_url' => (string)($row['authorized_media_url'] ?? ''),
             'aspect_ratio'       => (string)($row['aspect_ratio'] ?? '9:16'),
             'subtitle_style'     => $subtitleStyle,
             'target_clips'       => (int)($row['target_clips_count'] ?? 5),
@@ -1908,15 +2227,18 @@ class WorkerJobRepository
                         sv.external_video_id,
                         sv.uploaded_file_path,
                         sv.uploaded_file_name,
-                        sv.uploaded_file_mime
+                        sv.uploaded_file_mime,
+                        sv.authorized_media_url
                     FROM processing_jobs pj
                     INNER JOIN projects p ON p.id = pj.project_id AND p.user_id = pj.user_id
                     INNER JOIN source_videos sv ON sv.project_id = p.id AND sv.user_id = p.user_id
                     WHERE pj.status = 'queued'
                       AND pj.attempts < pj.max_attempts
                       AND p.authorized_source_confirmed = 1
-                      AND sv.source_mode = 'uploaded_file'
-                      AND sv.uploaded_file_path IS NOT NULL";
+                      AND (
+                          (sv.source_mode = 'uploaded_file' AND sv.uploaded_file_path IS NOT NULL AND sv.uploaded_file_path != '')
+                          OR (sv.source_mode = 'direct_media_url' AND sv.authorized_media_url IS NOT NULL AND sv.authorized_media_url != '')
+                      )";
 
             $params = [];
             if ($specificProjectId !== null && $specificProjectId > 0) {
@@ -1991,11 +2313,12 @@ class WorkerJobRepository
                 'attempt'              => $newAttempts,
                 'project_title'        => (string)$job['project_title'],
                 'authorized_source'    => [
-                    'source_mode'        => (string)$job['source_mode'],
-                    'external_video_id'  => (string)$job['external_video_id'],
-                    'uploaded_file_path' => (string)$job['uploaded_file_path'],
-                    'uploaded_file_name' => (string)$job['uploaded_file_name'],
-                    'uploaded_file_mime' => (string)$job['uploaded_file_mime'],
+                    'source_mode'          => (string)$job['source_mode'],
+                    'external_video_id'    => (string)$job['external_video_id'],
+                    'uploaded_file_path'   => (string)$job['uploaded_file_path'],
+                    'uploaded_file_name'   => (string)$job['uploaded_file_name'],
+                    'uploaded_file_mime'   => (string)$job['uploaded_file_mime'],
+                    'authorized_media_url' => (string)($job['authorized_media_url'] ?? ''),
                 ],
                 'clip_parameters'      => [
                     'target_clips_count'   => (int)$job['target_clips_count'],
@@ -2012,6 +2335,116 @@ class WorkerJobRepository
             }
             error_log('[ClipIA claimNextAuthorizedJob Error] ' . $e->getMessage());
             return null;
+        }
+    }
+
+    /**
+     * Persiste vídeo baixado pelo worker a partir de URL HTTPS autorizada e converte a fonte para uploaded_file.
+     *
+     * @return array{relative_path: string, original_name: string, mime_type: string, size_bytes: int}
+     */
+    public static function finalizeIngestedAuthorizedSource(
+        int $jobId,
+        int $projectId,
+        array $uploadData
+    ): array {
+        $pdo = Database::getConnection();
+        if ($pdo === null) {
+            throw new RuntimeException('Banco de dados indisponível.');
+        }
+
+        $stmt = $pdo->prepare(
+            "SELECT pj.id, pj.user_id, pj.status, sv.source_mode, sv.authorized_media_url, sv.source_url, sv.external_video_id,
+                    p.title, p.target_clips_count, p.min_duration_seconds, p.max_duration_seconds, p.aspect_ratio, p.subtitle_config_json
+             FROM processing_jobs pj
+             INNER JOIN projects p ON p.id = pj.project_id AND p.user_id = pj.user_id
+             INNER JOIN source_videos sv ON sv.project_id = p.id AND sv.user_id = p.user_id
+             WHERE pj.id = :job_id AND pj.project_id = :project_id
+             LIMIT 1"
+        );
+        $stmt->execute([':job_id' => $jobId, ':project_id' => $projectId]);
+        $row = $stmt->fetch();
+
+        if (!$row || (string)$row['status'] !== 'running') {
+            throw new RuntimeException('Tarefa inválida ou não está em execução para ingestão.');
+        }
+        if ((string)$row['source_mode'] !== 'direct_media_url') {
+            throw new RuntimeException('Ingestão permitida apenas para fonte direct_media_url.');
+        }
+
+        $userId = (int)$row['user_id'];
+        $rawSubCfg = isset($row['subtitle_config_json']) && is_string($row['subtitle_config_json'])
+            ? json_decode($row['subtitle_config_json'], true)
+            : [];
+        $subtitleStyle = SubtitleMetadataHelper::normalizeSubtitleStyle(is_array($rawSubCfg) ? $rawSubCfg : []);
+
+        $workerClient = new ExternalWorkerClient();
+        $payloadArray = $workerClient->buildJobPayload([
+            'project_id'           => $projectId,
+            'user_id'              => $userId,
+            'source_mode'          => 'uploaded_file',
+            'source_url'           => (string)($row['source_url'] ?? ''),
+            'external_video_id'    => (string)($row['external_video_id'] ?? ''),
+            'uploaded_file_path'   => $uploadData['relative_path'],
+            'uploaded_file_name'   => $uploadData['original_name'],
+            'uploaded_file_mime'   => $uploadData['mime_type'],
+            'target_clips_count'   => (int)($row['target_clips_count'] ?? CLIP_DEFAULT_COUNT),
+            'min_duration_seconds' => (int)($row['min_duration_seconds'] ?? CLIP_DEFAULT_MIN_DURATION),
+            'max_duration_seconds' => (int)($row['max_duration_seconds'] ?? CLIP_DEFAULT_MAX_DURATION),
+            'aspect_ratio'         => (string)($row['aspect_ratio'] ?? CLIP_DEFAULT_FORMAT),
+            'subtitle_style'       => $subtitleStyle,
+        ]);
+        $payloadJson = json_encode($payloadArray, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $now = date('Y-m-d H:i:s');
+
+        $pdo->beginTransaction();
+        try {
+            $pdo->prepare(
+                'UPDATE source_videos
+                 SET source_mode = :mode,
+                     authorized_media_url = NULL,
+                     uploaded_file_path = :path,
+                     uploaded_file_name = :name,
+                     uploaded_file_mime = :mime,
+                     uploaded_file_size = :size
+                 WHERE project_id = :project_id AND user_id = :user_id'
+            )->execute([
+                ':mode'       => 'uploaded_file',
+                ':path'       => $uploadData['relative_path'],
+                ':name'       => $uploadData['original_name'],
+                ':mime'       => $uploadData['mime_type'],
+                ':size'       => $uploadData['size_bytes'],
+                ':project_id' => $projectId,
+                ':user_id'    => $userId,
+            ]);
+
+            $pdo->prepare(
+                'UPDATE processing_jobs SET payload_json = :payload, updated_at = :now WHERE id = :job_id'
+            )->execute([
+                ':payload' => $payloadJson,
+                ':now'     => $now,
+                ':job_id'  => $jobId,
+            ]);
+
+            $pdo->commit();
+
+            UsageLogRepository::log(
+                $userId,
+                'source_ingested',
+                sprintf(
+                    'Worker ingeriu vídeo autorizado (%s) para o projeto "%s".',
+                    $uploadData['original_name'],
+                    (string)$row['title']
+                ),
+                $projectId
+            );
+
+            return $uploadData;
+        } catch (Throwable $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            throw $e;
         }
     }
 

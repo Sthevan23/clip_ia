@@ -115,6 +115,21 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 'O projeto voltou para a fila de processamento e será analisado na próxima execução do serviço Python.'
             );
         }
+    } elseif ($action === 'generate_clips') {
+        $projectId = (int)($_POST['project_id'] ?? 0);
+        $directMediaUrl = trim((string)($_POST['direct_media_url'] ?? ''));
+
+        if ($projectId <= 0) {
+            set_flash('error', 'Projeto inválido', 'Selecione um projeto válido.');
+        } else {
+            $result = ProjectRepository::queueGenerateClipsForUser($projectId, $userId, $directMediaUrl);
+            if ($result['ok']) {
+                set_flash('success', 'Geração enfileirada', $result['message']);
+                header('Location: project-studio.php?id=' . $projectId);
+                exit;
+            }
+            set_flash('error', 'Não foi possível gerar clipes', $result['message']);
+        }
     } elseif ($action === 'upload_authorized_source') {
         $projectId = (int)($_POST['project_id'] ?? 0);
         $project = ProjectRepository::findByIdForUser($projectId, $userId);
@@ -130,6 +145,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                         'Fonte de vídeo autorizada vinculada!',
                         'O arquivo "' . $uploadMeta['original_name'] . '" foi salvo. O status do projeto agora é "Aguardando processamento".'
                     );
+                    header('Location: project-studio.php?id=' . $projectId);
+                    exit;
                 } else {
                     set_flash('error', 'Falha ao vincular arquivo', 'Não foi possível atualizar o estado do projeto.');
                 }
@@ -625,7 +642,7 @@ require_once __DIR__ . '/includes/header.php';
                         <option value="failed">Falhou</option>
                     </select>
 
-                    <a href="new-project.php" class="btn btn-primary">
+                    <a href="create-clips.php" class="btn btn-primary">
                         <?= clipia_icon('plus-circle', 18) ?>
                         <span>Novo projeto</span>
                     </a>
@@ -653,9 +670,9 @@ require_once __DIR__ . '/includes/header.php';
                                     Crie seu primeiro projeto informando o link de referência do YouTube e os parâmetros de duração dos cortes verticais 9:16.
                                 </p>
                                 <div class="empty-state-actions">
-                                    <a href="new-project.php" class="btn btn-primary btn-sm">
+                                    <a href="create-clips.php" class="btn btn-primary btn-sm">
                                         <?= clipia_icon('plus-circle', 16) ?>
-                                        <span>Criar meu primeiro projeto</span>
+                                        <span>Criar clipes</span>
                                     </a>
                                 </div>
                             </div>
@@ -745,6 +762,15 @@ require_once __DIR__ . '/includes/header.php';
                                                         </form>
                                                     <?php endif; ?>
 
+                                                    <a
+                                                        href="project-studio.php?id=<?= (int)$proj['id'] ?>"
+                                                        class="btn btn-xs btn-primary"
+                                                        title="Acompanhar progresso e clipes"
+                                                    >
+                                                        <?= clipia_icon('sparkles', 14) ?>
+                                                        <span>Estúdio</span>
+                                                    </a>
+
                                                     <button
                                                         type="button"
                                                         class="btn btn-xs btn-secondary"
@@ -760,6 +786,8 @@ require_once __DIR__ . '/includes/header.php';
                                                         data-status-key="<?= e($statusKey) ?>"
                                                         data-status-label="<?= e($proj['status_label']) ?>"
                                                         data-uploaded-file="<?= e($proj['uploaded_file_name']) ?>"
+                                                        data-source-mode="<?= e($proj['source_mode'] ?? 'url_only') ?>"
+                                                        data-authorized-media-url="<?= e($proj['authorized_media_url'] ?? '') ?>"
                                                     >
                                                         <?= clipia_icon('eye', 14) ?>
                                                         <span>Abrir</span>
@@ -846,6 +874,33 @@ require_once __DIR__ . '/includes/header.php';
             </div>
         </div>
 
+        <form
+            action="projects.php"
+            method="POST"
+            id="modalGenerateClipsForm"
+            style="margin-top: 16px; padding: 14px; border-radius: var(--radius-md); background-color: var(--bg-elevated); border: 1px solid var(--accent-soft-border); display: none;"
+        >
+            <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
+            <input type="hidden" name="action" value="generate_clips">
+            <input type="hidden" name="project_id" id="modalGenerateProjectId" value="">
+
+            <label for="modalDirectMediaUrl" class="form-label">URL HTTPS do arquivo de vídeo (opcional)</label>
+            <div class="url-input-row">
+                <input
+                    type="url"
+                    id="modalDirectMediaUrl"
+                    name="direct_media_url"
+                    class="form-control"
+                    placeholder="https://seu-dominio.com/videos/episodio.mp4"
+                    autocomplete="off"
+                >
+                <button type="submit" class="btn btn-primary btn-sm">Gerar clipes</button>
+            </div>
+            <span class="form-hint" id="modalGenerateClipsHint">
+                Links do YouTube não são baixados automaticamente. Informe uma URL direta (.mp4, .mov ou .webm) que você tem direito de usar, ou envie o arquivo abaixo.
+            </span>
+        </form>
+
         <!-- Formulário para anexar arquivo autorizado quando o projeto estiver em 'awaiting_source' -->
         <form
             action="projects.php"
@@ -872,7 +927,7 @@ require_once __DIR__ . '/includes/header.php';
                 >
                 <button type="submit" class="btn btn-primary btn-sm">Enviar arquivo</button>
             </div>
-            <span class="form-hint">Colar o link do YouTube não realiza download do vídeo. Envie o arquivo autorizado para avançar o projeto para "Aguardando processamento".</span>
+            <span class="form-hint">Alternativa ao link HTTPS acima: envie o MP4/MOV/WebM autorizado para avançar o projeto.</span>
         </form>
 
         <div class="modal-footer">

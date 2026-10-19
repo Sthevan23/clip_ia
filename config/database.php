@@ -93,6 +93,7 @@ class Database
                 uploaded_file_name TEXT NULL,
                 uploaded_file_mime TEXT NULL,
                 uploaded_file_size INTEGER NULL,
+                authorized_media_url TEXT NULL,
                 duration_seconds INTEGER NULL,
                 created_at TEXT NOT NULL
             );
@@ -192,6 +193,12 @@ class Database
                 if (!in_array($colName, $candColNames, true)) {
                     $pdo->exec("ALTER TABLE clip_candidates ADD COLUMN {$colName} {$colDef};");
                 }
+            }
+
+            $svCols = $pdo->query("PRAGMA table_info(source_videos)")->fetchAll();
+            $svColNames = array_map(static fn($c) => (string)($c['name'] ?? ''), $svCols);
+            if (!in_array('authorized_media_url', $svColNames, true)) {
+                $pdo->exec('ALTER TABLE source_videos ADD COLUMN authorized_media_url TEXT NULL;');
             }
         } catch (Throwable $e) {
             // Ignora se já existir

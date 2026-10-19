@@ -8,7 +8,7 @@ declare(strict_types=1);
  * - Autenticação obrigatória entre serviços via HMAC-SHA256 (`X-ClipIA-Timestamp` e `X-ClipIA-Signature`).
  * - Exige HTTPS em produção (`WORKER_REQUIRE_HTTPS`), permitindo loopback (`127.0.0.1` / `localhost`) no ambiente de dev.
  * - Nunca expõe chaves de API no navegador.
- * - Não aceita nem entrega URLs arbitrárias para download; entrega apenas tarefas que possuam fonte autorizada (`source_mode = 'uploaded_file'`).
+ * - Entrega tarefas com arquivo enviado ou URL HTTPS de mídia direta validada no painel (`direct_media_url`).
  * - Valida estritamente o JSON de candidatos de corte recebido do modelo/worker antes de persistir no banco.
  */
 
@@ -202,6 +202,81 @@ try {
             'size_bytes'      => strlen($binaryData),
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         exit;
+    }
+
+    if ($action === 'upload_ingested_source') {
+        $jobId        = (int)($payload['job_id'] ?? 0);
+        $projectId    = (int)($payload['project_id'] ?? 0);
+        $sourceBase64 = trim((string)($payload['source_base64'] ?? ''));
+        $origName     = basename(trim((string)($payload['original_name'] ?? 'video.mp4')));
+        $mimeType     = trim((string)($payload['mime_type'] ?? ''));
+
+        if ($jobId <= 0 || $projectId <= 0 || $sourceBase64 === '') {
+            throw new InvalidArgumentException('job_id, project_id e source_base64 são obrigatórios.');
+        }
+
+        $binaryData = base64_decode($sourceBase64, true);
+        if ($binaryData === false || $binaryData === '') {
+            throw new InvalidArgumentException('Conteúdo binário do vídeo em base64 é inválido.');
+        }
+
+        $pdo = Database::getConnection();
+        if ($pdo === null) {
+            throw new RuntimeException('Banco de dados indisponível.');
+        }
+
+        $stmt = $pdo->prepare(
+            "SELECT pj.user_id, pj.status, sv.source_mode
+             FROM processing_jobs pj
+             INNER JOIN source_videos sv ON sv.project_id = pj.project_id AND sv.user_id = pj.user_id
+             WHERE pj.id = :job_id AND pj.project_id = :project_id
+             LIMIT 1"
+        );
+        $stmt->execute([':job_id' => $jobId, ':project_id' => $projectId]);
+        $row = $stmt->fetch();
+        if (!$row || (string)$row['source_mode'] !== 'direct_media_url' || (string)$row['status'] !== 'running') {
+            http_response_code(403);
+            echo json_encode([
+                'ok'      => false,
+                'message' => 'Ingestão negada: tarefa inválida ou fonte não é URL de mídia direta.',
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        $userId = (int)$row['user_id'];
+        $tmpPath = tempnam(sys_get_temp_dir(), 'clipia_ingest_');
+        if ($tmpPath === false) {
+            throw new RuntimeException('Falha ao criar arquivo temporário de ingestão.');
+        }
+        try {
+            if (@file_put_contents($tmpPath, $binaryData) === false) {
+                throw new RuntimeException('Falha ao gravar vídeo temporário.');
+            }
+
+            $finfo = new finfo(FILEINFO_MIME_TYPE);
+            $detectedMime = (string)$finfo->file($tmpPath);
+            if ($mimeType !== '' && str_starts_with($mimeType, 'video/')) {
+                $detectedMime = $mimeType;
+            }
+
+            $uploadMeta = VideoUploadManager::storeIngestedTempFile($userId, [
+                'tmp_path'      => $tmpPath,
+                'original_name' => $origName,
+                'size_bytes'    => strlen($binaryData),
+                'mime_type'     => $detectedMime,
+            ]);
+
+            WorkerJobRepository::finalizeIngestedAuthorizedSource($jobId, $projectId, $uploadMeta);
+
+            echo json_encode([
+                'ok'            => true,
+                'relative_path' => $uploadMeta['relative_path'],
+                'message'       => 'Vídeo ingerido e vinculado ao projeto.',
+            ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            exit;
+        } finally {
+            @unlink($tmpPath);
+        }
     }
 
     if ($action === 'reserve_budget') {
